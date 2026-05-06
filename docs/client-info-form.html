@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Client Information Form — Agoc Care+</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0fdfa;
+      color: #134e4a;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* ── COVER PAGE ── */
+    .cover {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #134e4a 0%, #0891b2 60%, #22d3ee 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 40px;
+      page-break-after: always;
+    }
+    .cover-logo {
+      width: 80px; height: 80px;
+      background: rgba(255,255,255,0.15);
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 36px;
+    }
+    .cover h1 { font-size: 38px; font-weight: 900; color: #fff; margin-bottom: 8px; letter-spacing: -1px; }
+    .cover h1 span { color: #67e8f9; }
+    .cover .sub { font-size: 16px; color: rgba(255,255,255,0.75); margin-bottom: 40px; }
+    .cover-badge {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      font-size: 12px; font-weight: 600;
+      padding: 6px 18px; border-radius: 100px;
+      display: inline-block; margin-bottom: 50px;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .cover-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 16px; width: 100%; max-width: 600px;
+      margin: 0 auto 50px;
+    }
+    .cover-stat {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 14px; padding: 18px 10px;
+    }
+    .cover-stat .num { font-size: 22px; font-weight: 900; color: #fff; }
+    .cover-stat .lbl { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+    .cover-footer { color: rgba(255,255,255,0.5); font-size: 12px; }
+    .cover-footer strong { color: rgba(255,255,255,0.8); }
+
+    /* ── PAGE ── */
+    .page {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 50px 50px 40px;
+      background: #fff;
+    }
+    @media print {
+      .page { padding: 36px 40px; }
+      .section { page-break-inside: avoid; }
+    }
+
+    /* ── SECTION ── */
+    .section {
+      margin-bottom: 44px;
+    }
+    .section-header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #ccfbf1;
+    }
+    .section-num {
+      width: 34px; height: 34px;
+      background: #0891b2; color: #fff;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 900; flex-shrink: 0;
+    }
+    .section-title { font-size: 17px; font-weight: 800; color: #134e4a; }
+    .section-desc  { font-size: 12px; color: #6b7280; margin-top: 1px; }
+
+    /* ── FIELDS ── */
+    .fields { display: flex; flex-direction: column; gap: 14px; }
+    .field-group {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field.full { grid-column: 1/-1; }
+
+    .field label {
+      font-size: 11px; font-weight: 700;
+      color: #0891b2; text-transform: uppercase; letter-spacing: 0.6px;
+    }
+    .field label span { color: #ef4444; }
+    .field .hint { font-size: 11px; color: #9ca3af; font-style: italic; margin-bottom: 2px; }
+    .field .line {
+      border: none; border-bottom: 1.5px solid #ccfbf1;
+      padding: 7px 4px;
+      width: 100%; background: transparent;
+      font-size: 13px; color: #134e4a; outline: none;
+      font-family: inherit;
+    }
+    .field textarea.line {
+      border: 1.5px solid #ccfbf1; border-radius: 8px;
+      resize: vertical; min-height: 70px; padding: 8px;
+    }
+
+    /* ── TABLE ── */
+    .info-table { width: 100%; border-collapse: collapse; }
+    .info-table th {
+      background: #0891b2; color: #fff;
+      padding: 10px 14px; font-size: 12px; text-align: left;
+      font-weight: 700;
+    }
+    .info-table th:first-child { border-radius: 10px 0 0 0; }
+    .info-table th:last-child  { border-radius: 0 10px 0 0; }
+    .info-table td {
+      padding: 10px 14px; font-size: 12px;
+      border-bottom: 1px solid #f0fdfa;
+    }
+    .info-table tr:nth-child(even) td { background: #f0fdfa; }
+    .info-table tr:last-child td:first-child { border-radius: 0 0 0 10px; }
+    .info-table tr:last-child td:last-child  { border-radius: 0 0 10px 0; }
+    .required-badge {
+      background: #fef2f2; color: #dc2626;
+      font-size: 10px; font-weight: 700; padding: 2px 7px;
+      border-radius: 100px; display: inline-block;
+    }
+    .optional-badge {
+      background: #f0fdfa; color: #0891b2;
+      font-size: 10px; font-weight: 700; padding: 2px 7px;
+      border-radius: 100px; display: inline-block;
+    }
+
+    /* ── CHECKLIST ── */
+    .checklist { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .checklist li {
+      display: flex; align-items: flex-start; gap: 12px;
+      background: #f0fdfa; border: 1px solid #ccfbf1;
+      padding: 12px 14px; border-radius: 10px;
+    }
+    .check-box {
+      width: 18px; height: 18px; flex-shrink: 0;
+      border: 2px solid #0891b2; border-radius: 4px;
+      margin-top: 1px;
+    }
+    .check-label { font-size: 13px; font-weight: 600; color: #134e4a; }
+    .check-sub   { font-size: 11px; color: #6b7280; margin-top: 2px; }
+
+    /* ── NOTE BOX ── */
+    .note {
+      background: #fef9c3; border-left: 4px solid #f59e0b;
+      padding: 12px 16px; border-radius: 0 10px 10px 0;
+      font-size: 12px; color: #92400e;
+      margin-top: 10px;
+    }
+    .note strong { color: #78350f; }
+
+    /* ── INFO BOX ── */
+    .info-box {
+      background: #eff6ff; border-left: 4px solid #3b82f6;
+      padding: 12px 16px; border-radius: 0 10px 10px 0;
+      font-size: 12px; color: #1e40af; margin-top: 10px;
+    }
+
+    /* ── PRODUCT ROW ── */
+    .product-row {
+      background: #f0fdfa; border: 1px solid #ccfbf1;
+      border-radius: 12px; padding: 16px;
+      margin-bottom: 12px;
+    }
+    .product-row-title { font-size: 13px; font-weight: 700; color: #0891b2; margin-bottom: 10px; }
+
+    /* ── HEADER ── */
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 50px;
+      background: #134e4a; color: #fff;
+      margin-bottom: 0;
+    }
+    .page-header .brand { font-size: 18px; font-weight: 900; }
+    .page-header .brand span { color: #67e8f9; }
+    .page-header .doc-id { font-size: 11px; color: rgba(255,255,255,0.5); }
+
+    /* ── DIVIDER ── */
+    .divider { border: none; border-top: 1px solid #e5e7eb; margin: 30px 0; }
+
+    /* ── FOOTER ── */
+    .page-footer {
+      margin-top: 50px; padding-top: 20px;
+      border-top: 2px solid #ccfbf1;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11px; color: #9ca3af;
+    }
+
+    /* ── PRINT ── */
+    @media print {
+      body { background: #fff; }
+      .cover { min-height: auto; padding: 80px 60px; }
+      .page-break { page-break-before: always; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════
+     COVER PAGE
+════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-logo">💊</div>
+  <h1>Agoc Care<span>+</span></h1>
+  <p class="sub">Online Pharmacy Website — Client Information Form</p>
+  <div class="cover-badge">Confidential Document</div>
+
+  <div class="cover-grid">
+    <div class="cover-stat">
+      <div class="num">9</div>
+      <div class="lbl">Sections</div>
+    </div>
+    <div class="cover-stat">
+      <div class="num">50+</div>
+      <div class="lbl">Fields to fill</div>
+    </div>
+    <div class="cover-stat">
+      <div class="num">15 min</div>
+      <div class="lbl">Est. time</div>
+    </div>
+  </div>
+
+  <p class="cover-footer">
+    Prepared by <strong>Agoc Care+ Development Team</strong> &nbsp;·&nbsp;
+    Date: <strong id="cdate"></strong>
+  </p>
+  <script>document.getElementById('cdate').textContent = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});</script>
+</div>
+
+<!-- ════════════════════════════════════
+     HEADER (repeats on all pages)
+════════════════════════════════════ -->
+<div class="page-header">
+  <div class="brand">Agoc Care<span>+</span> &nbsp;<span style="font-size:13px;font-weight:400;opacity:.6">Client Information Form</span></div>
+  <div class="doc-id">Version 1.0 &nbsp;|&nbsp; Confidential</div>
+</div>
+
+<div class="page">
+
+  <!-- ── INTRO ── -->
+  <div style="background:linear-gradient(135deg,#134e4a,#0891b2);border-radius:16px;padding:28px 32px;margin-bottom:40px;color:#fff;">
+    <h2 style="font-size:20px;font-weight:900;margin-bottom:8px;">Welcome! 👋</h2>
+    <p style="font-size:13px;opacity:.85;line-height:1.7;">
+      This form collects all the information we need to build and customize your
+      <strong>Agoc Care+</strong> online pharmacy website. Please fill in as much detail as possible.
+      Fields marked <span style="color:#fca5a5;font-weight:700;">*</span> are required.
+      You can fill this digitally or print and fill by hand.
+    </p>
+    <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+      <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:8px 16px;font-size:12px;">📧 Email back to your developer</div>
+      <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:8px 16px;font-size:12px;">📄 Or print and scan</div>
+      <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:8px 16px;font-size:12px;">⏱ Takes ~15 minutes</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════
+       SECTION 1: BUSINESS INFO
+  ════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <div class="section-title">Business Information</div>
+        <div class="section-desc">Basic details about your pharmacy / healthcare business</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field-group">
+        <div class="field">
+          <label>Business / Pharmacy Name <span>*</span></label>
+          <div class="hint">As it should appear on the website</div>
+          <input class="line" type="text" placeholder="e.g. Agoc Care Pharmacy"/>
+        </div>
+        <div class="field">
+          <label>Tagline / Slogan</label>
+          <div class="hint">Short line below your logo</div>
+          <input class="line" type="text" placeholder="e.g. Your Health, Delivered Fast"/>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>Owner / Contact Person Name <span>*</span></label>
+          <input class="line" type="text" placeholder="Full name"/>
+        </div>
+        <div class="field">
+          <label>Designation / Role <span>*</span></label>
+          <input class="line" type="text" placeholder="e.g. Proprietor, CEO"/>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>Phone Number <span>*</span></label>
+          <input class="line" type="text" placeholder="+91 XXXXX XXXXX"/>
+        </div>
+        <div class="field">
+          <label>WhatsApp Number</label>
+          <input class="line" type="text" placeholder="+91 XXXXX XXXXX"/>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>Email Address <span>*</span></label>
+          <input class="line" type="email" placeholder="business@email.com"/>
+        </div>
+        <div class="field">
+          <label>Website Domain (if already purchased)</label>
+          <input class="line" type="text" placeholder="e.g. agoccare.com"/>
+        </div>
+      </div>
+      <div class="field full">
+        <label>Full Business Address <span>*</span></label>
+        <textarea class="line" placeholder="Shop/Office address, Street, City, State, PIN"></textarea>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>GST Number</label>
+          <input class="line" type="text" placeholder="27XXXXX1234X1ZX"/>
+        </div>
+        <div class="field">
+          <label>Drug License Number <span>*</span></label>
+          <input class="line" type="text" placeholder="DL No."/>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>Year Established</label>
+          <input class="line" type="text" placeholder="e.g. 2018"/>
+        </div>
+        <div class="field">
+          <label>Business Type <span>*</span></label>
+          <input class="line" type="text" placeholder="e.g. Retail Pharmacy, Online Only, Both"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- ════════════════════════════
+       SECTION 2: BRANDING
+  ════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <div class="section-title">Branding &amp; Design</div>
+        <div class="section-desc">Logo, colours and visual identity</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field-group">
+        <div class="field">
+          <label>Do you have a logo? <span>*</span></label>
+          <input class="line" type="text" placeholder="Yes / No / Need one designed"/>
+        </div>
+        <div class="field">
+          <label>Logo file format (if available)</label>
+          <input class="line" type="text" placeholder="PNG / SVG / JPG / AI / PSD"/>
+        </div>
+      </div>
+      <div class="field full">
+        <label>Brand Colours (Hex codes or description)</label>
+        <div class="hint">e.g. #0891B2 (teal), #22C55E (green) — or describe: blue and white theme</div>
+        <input class="line" type="text" placeholder="Primary colour, Secondary colour, Accent colour"/>
+      </div>
+      <div class="field full">
+        <label>Reference websites you like the look of</label>
+        <div class="hint">Websites whose design/style you want us to take inspiration from</div>
+        <textarea class="line" placeholder="1. www.example.com — I like the layout&#10;2. www.example2.com — I like the colours"></textarea>
+      </div>
+      <div class="field full">
+        <label>Font / Typography Preference</label>
+        <input class="line" type="text" placeholder="e.g. Modern & clean, Traditional, Bold, No preference"/>
+      </div>
+    </div>
+    <div class="note">
+      <strong>📎 Please attach:</strong> Logo file (PNG with transparent background preferred), any brand guidelines PDF, or existing marketing materials.
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- ════════════════════════════
+       SECTION 3: PRODUCTS
+  ════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <div class="section-title">Products &amp; Catalogue</div>
+        <div class="section-desc">Medicine and healthcare product listings</div>
+      </div>
+    </div>
+
+    <div class="fields">
+      <div class="field-group">
+        <div class="field">
+          <label>Approx. total number of products <span>*</span></label>
+          <input class="line" type="text" placeholder="e.g. 100, 500, 1000+"/>
+        </div>
+        <div class="field">
+          <label>Do you have a product list / Excel? <span>*</span></label>
+          <input class="line" type="text" placeholder="Yes (will send) / No / Need help creating"/>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-size:12px;font-weight:700;color:#134e4a;margin:20px 0 12px;">For each product, please provide the following details:</p>
+
+    <table class="info-table">
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Example</th>
+          <th>Required?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Product / Medicine Name</td><td>Paracetamol 500mg</td><td><span class="required-badge">Required</span></td></tr>
+        <tr><td>Brand / Manufacturer</td><td>Cipla, Sun Pharma</td><td><span class="required-badge">Required</span></td></tr>
+        <tr><td>Category</td><td>Tablets, Syrups, Vitamins</td><td><span class="required-badge">Required</span></td></tr>
+        <tr><td>Selling Price (₹)</td><td>₹25.00</td><td><span class="required-badge">Required</span></td></tr>
+        <tr><td>MRP (₹)</td><td>₹30.00</td><td><span class="required-badge">Required</span></td></tr>
+        <tr><td>Stock Quantity</td><td>100 units</td><td><span class="required-badge">Required</span></td></tr>
+        <tr><td>Composition / Salt</td><td>Paracetamol IP 500mg</td><td><span class="optional-badge">Optional</span></td></tr>
+        <tr><td>Prescription Required?</td><td>Yes / No</td><td><span class="required-badge">Required</span></td></tr>
+        <tr><td>Expiry Date</td><td>Dec 2026</td><td><span class="optional-badge">Optional</span></td></tr>
+        <tr><td>Product Description</td><td>Short 2-3 line description</td><td><span class="optional-badge">Optional</span></td></tr>
+        <tr><td>Product Image</td><td>JPG / PNG (min 400×400px)</td><td><span class="optional-badge">Optional</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="field" style="margin-top:18px;">
+      <label>Product Categories you want on website <span>*</span></label>
+      <textarea class="line" placeholder="e.g. Tablets, Syrups, Capsules, Injections, Vitamins, Skincare, Medical Devices, Baby Care, etc."></textarea>
+    </div>
+
+    <div class="note">
+      <strong>📎 Please attach:</strong> Excel / CSV file with product list. Format: Name | Brand | Category | Price | MRP | Stock | Composition | Prescription (Y/N)
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- ════════════════════════════
+       SECTION 4: CONTACT & LOCATION
+  ════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <div class="section-title">Contact &amp; Location Details</div>
+        <div class="section-desc">Information shown on the website contact/footer section</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field-group">
+        <div class="field">
+          <label>Customer Support Phone <span>*</span></label>
+          <input class="line" type="text" placeholder="+91 XXXXX XXXXX"/>
+        </div>
+        <div class="field">
+          <label>Customer Support Email <span>*</span></label>
+          <input class="line" type="email" placeholder="support@yourdomain.com"/>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>WhatsApp Support Number</label>
+          <input class="line" type="text" placeholder="+91 XXXXX XXXXX"/>
+        </div>
+        <div class="field">
+          <label>Support Hours</label>
+          <input class="line" type="text" placeholder="e.g. Mon–Sat, 9AM–6PM / 24×7"/>
+        </div>
+      </div>
+      <div class="field full">
+        <label>Store / Office Address (for footer)</label>
+        <textarea class="line" placeholder="Full address as you want it shown on the website"></textarea>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>Google Maps Link</label>
+          <input class="line" type="text" placeholder="https://maps.google.com/..."/>
+        </div>
+        <div class="field">
+          <label>Delivery Service Areas / Pincodes</label>
+          <input class="line" type="text" placeholder="e.g. All India / Mumbai only / PINs: 400001…"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- ════════════════════════════
+       SECTION 5: SOCIAL MEDIA
+  ════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <div class="section-title">Social Media &amp; Online Presence</div>
+        <div class="section-desc">Links for footer and social sharing</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field-group">
+        <div class="field">
+          <label>Facebook Page URL</label>
+          <input class="line" type="text" placeholder="https://facebook.com/yourpage"/>
+        </div>
+        <div class="field">
+          <label>Instagram Handle</label>
+          <input class="line" type="text" placeholder="@yourhandle"/>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>Twitter / X Handle</label>
+          <input class="line" type="text" placeholder="@yourhandle"/>
+        </div>
+        <div class="field">
+          <label>YouTube Channel</label>
+          <input class="line" type="text" placeholder="https://youtube.com/..."/>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>LinkedIn Page</label>
+          <input class="line" type="text" placeholder="https://linkedin.com/company/..."/>
+        </div>
+        <div class="field">
+          <label>Google Business Profile URL</label>
+          <input class="line" type="text" placeholder="https://g.page/..."/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- ════════════════════════════
+       SECTION 6: POLICIES
+  ════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div>
+        <div class="section-title">Business Policies</div>
+        <div class="section-desc">Shipping, returns and other policies shown on the website</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field-group">
+        <div class="field">
+          <label>Free Delivery Minimum Order Value <span>*</span></label>
+          <input class="line" type="text" placeholder="e.g. Free delivery above ₹499"/>
+        </div>
+        <div class="field">
+          <label>Delivery Charge (below minimum)</label>
+          <input class="line" type="text" placeholder="e.g. ₹49"/>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>Estimated Delivery Time <span>*</span></label>
+          <input class="line" type="text" placeholder="e.g. 24–48 hours / 3–5 days"/>
+        </div>
+        <div class="field">
+          <label>Same-Day Delivery Available?</label>
+          <input class="line" type="text" placeholder="Yes / No / In select areas"/>
+        </div>
+      </div>
+      <div class="field full">
+        <label>Return / Refund Policy <span>*</span></label>
+        <textarea class="line" placeholder="e.g. 7-day return for damaged/wrong products. No return on prescription medicines. Refund within 5–7 business days..."></textarea>
+      </div>
+      <div class="field full">
+        <label>Cancellation Policy</label>
+        <textarea class="line" placeholder="e.g. Orders can be cancelled within 2 hours of placing..."></textarea>
+      </div>
+      <div class="field full">
+        <label>Privacy Policy (key points)</label>
+        <textarea class="line" placeholder="e.g. We do not share personal data. Prescriptions stored securely..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- ════════════════════════════
+       SECTION 7: PAYMENT
+  ════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">7</div>
+      <div>
+        <div class="section-title">Payment &amp; Banking</div>
+        <div class="section-desc">Payment gateway and bank account details</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field-group">
+        <div class="field">
+          <label>Razorpay Account Email <span>*</span></label>
+          <div class="hint">The email registered on Razorpay dashboard</div>
+          <input class="line" type="email" placeholder="razorpay@yourdomain.com"/>
+        </div>
+        <div class="field">
+          <label>Razorpay Key ID (Live) <span>*</span></label>
+          <div class="hint">From Razorpay Settings → API Keys (Live mode)</div>
+          <input class="line" type="text" placeholder="rzp_live_XXXXXXXXXXXX"/>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>Razorpay Key Secret (Live) <span>*</span></label>
+          <input class="line" type="text" placeholder="XXXXXXXXXXXXXXXXXXXXXXXX"/>
+        </div>
+        <div class="field">
+          <label>Payment Methods to Show</label>
+          <input class="line" type="text" placeholder="UPI, Cards, Net Banking, Wallets (select all that apply)"/>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>Bank Account Name</label>
+          <input class="line" type="text" placeholder="As per bank records"/>
+        </div>
+        <div class="field">
+          <label>Linked UPI ID (for QR code)</label>
+          <input class="line" type="text" placeholder="yourname@bankname"/>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>⚠️ Security Note:</strong> Share Razorpay keys only via encrypted email or WhatsApp. Never in plain text documents that may be forwarded.
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- ════════════════════════════
+       SECTION 8: CONTENT
+  ════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">8</div>
+      <div>
+        <div class="section-title">Website Content</div>
+        <div class="section-desc">Text and images for homepage, about page and other sections</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field full">
+        <label>Homepage Hero Headline <span>*</span></label>
+        <div class="hint">Main large text visible on the homepage banner</div>
+        <input class="line" type="text" placeholder="e.g. Your Health, Delivered Fast"/>
+      </div>
+      <div class="field full">
+        <label>Homepage Hero Sub-text</label>
+        <div class="hint">1–2 lines below the headline</div>
+        <textarea class="line" placeholder="e.g. Genuine medicines & healthcare products at your doorstep. Order by 2 PM for same-day dispatch."></textarea>
+      </div>
+      <div class="field full">
+        <label>About Us Content <span>*</span></label>
+        <textarea class="line" placeholder="Write about your pharmacy history, mission, values, why customers should trust you (3–5 paragraphs)..."></textarea>
+      </div>
+      <div class="field full">
+        <label>Why Choose Us — Key Points</label>
+        <div class="hint">4–6 points shown as feature cards on the website</div>
+        <textarea class="line" placeholder="1. 100% Genuine Medicines&#10;2. Fast Delivery&#10;3. Licensed Pharmacists&#10;4. Secure Payments&#10;5. Easy Returns"></textarea>
+      </div>
+      <div class="field full">
+        <label>Customer Testimonials / Reviews</label>
+        <div class="hint">Real customer names, city and review text (min 4–6 reviews)</div>
+        <textarea class="line" placeholder="1. Name: Priya Sharma, City: Mumbai&#10;   Review: Great service, medicines delivered on time...&#10;&#10;2. Name: Rahul Verma, City: Delhi&#10;   Review: ..."></textarea>
+      </div>
+      <div class="field full">
+        <label>Banner / Offer Text</label>
+        <div class="hint">Promotional banners shown on homepage</div>
+        <textarea class="line" placeholder="e.g. 20% off on Vitamins | Free delivery above ₹499 | New arrivals in Skincare"></textarea>
+      </div>
+      <div class="field full">
+        <label>Announcement Bar Text</label>
+        <div class="hint">Scrolling text at the top of every page</div>
+        <input class="line" type="text" placeholder="e.g. Free delivery on orders above ₹499 | Genuine medicines | 24/7 support"/>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- ════════════════════════════
+       SECTION 9: ASSETS CHECKLIST
+  ════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">9</div>
+      <div>
+        <div class="section-title">Files &amp; Assets Checklist</div>
+        <div class="section-desc">Tick what you can provide. We'll help with anything you don't have.</div>
+      </div>
+    </div>
+
+    <ul class="checklist">
+      <li>
+        <div class="check-box"></div>
+        <div>
+          <div class="check-label">Business Logo</div>
+          <div class="check-sub">PNG with transparent background preferred. Min 500×500px. Formats: PNG / SVG / AI / PSD</div>
+        </div>
+      </li>
+      <li>
+        <div class="check-box"></div>
+        <div>
+          <div class="check-label">Product List (Excel / CSV)</div>
+          <div class="check-sub">Columns: Name, Brand, Category, Price, MRP, Stock, Composition, Rx Required (Y/N), Description</div>
+        </div>
+      </li>
+      <li>
+        <div class="check-box"></div>
+        <div>
+          <div class="check-label">Product Images</div>
+          <div class="check-sub">JPG or PNG, min 400×400px, white/light background. One image per product.</div>
+        </div>
+      </li>
+      <li>
+        <div class="check-box"></div>
+        <div>
+          <div class="check-label">Banner / Promotional Images</div>
+          <div class="check-sub">Homepage slider images. Recommended size: 1920×600px. Formats: JPG/PNG</div>
+        </div>
+      </li>
+      <li>
+        <div class="check-box"></div>
+        <div>
+          <div class="check-label">About Us / Team Photos</div>
+          <div class="check-sub">Professional photos of pharmacy, team, store interior. Min 800×600px.</div>
+        </div>
+      </li>
+      <li>
+        <div class="check-box"></div>
+        <div>
+          <div class="check-label">Certificates &amp; Licenses (for display)</div>
+          <div class="check-sub">Drug license, FSSAI, GST certificate — scanned copies for Trust section</div>
+        </div>
+      </li>
+      <li>
+        <div class="check-box"></div>
+        <div>
+          <div class="check-label">Razorpay Live API Keys</div>
+          <div class="check-sub">Key ID and Key Secret from Razorpay Dashboard → Settings → API Keys</div>
+        </div>
+      </li>
+      <li>
+        <div class="check-box"></div>
+        <div>
+          <div class="check-label">Domain &amp; Hosting Login</div>
+          <div class="check-sub">cPanel / Hostinger login credentials for deployment</div>
+        </div>
+      </li>
+      <li>
+        <div class="check-box"></div>
+        <div>
+          <div class="check-label">Admin Account Details</div>
+          <div class="check-sub">Preferred admin email and password for the website admin panel</div>
+        </div>
+      </li>
+    </ul>
+
+    <div class="info-box" style="margin-top:16px;">
+      <strong>ℹ️ Don't have everything?</strong> That's okay! Share what you have and we'll work with it. For missing items, we can use placeholder content initially and update later.
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- ── ADDITIONAL NOTES ── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">✎</div>
+      <div>
+        <div class="section-title">Additional Notes / Special Requirements</div>
+        <div class="section-desc">Anything else you'd like us to know or include</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field full">
+        <label>Special Features or Custom Requirements</label>
+        <textarea class="line" style="min-height:100px;" placeholder="e.g. I need a loyalty points system / I want a blog section / I need multilingual support (Hindi + English) / etc."></textarea>
+      </div>
+      <div class="field full">
+        <label>Target Launch Date</label>
+        <input class="line" type="text" placeholder="e.g. Within 2 weeks / By 1st June 2026 / ASAP"/>
+      </div>
+      <div class="field full">
+        <label>Budget Range (optional)</label>
+        <input class="line" type="text" placeholder="e.g. ₹15,000 – ₹25,000"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <div class="page-footer">
+    <div>
+      <strong style="color:#134e4a;">Agoc Care+</strong> &nbsp;·&nbsp; Client Information Form &nbsp;·&nbsp; Version 1.0
+    </div>
+    <div>
+      Return completed form to your developer &nbsp;·&nbsp;
+      <strong style="color:#0891b2;">Confidential</strong>
+    </div>
+  </div>
+
+</div>
+
+<!-- Print button (hidden when printing) -->
+<div style="text-align:center;padding:30px;background:#f0fdfa;" class="no-print">
+  <p style="color:#6b7280;font-size:13px;margin-bottom:16px;">
+    To save as PDF: Click the button below or press <strong>Ctrl+P</strong> → Select "Save as PDF"
+  </p>
+  <button onclick="window.print()"
+    style="background:#0891b2;color:#fff;border:none;padding:14px 40px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(8,145,178,.3);">
+    🖨️ Save / Print as PDF
+  </button>
+</div>
+
+<style>
+  @media print {
+    .no-print { display: none !important; }
+    .page-header { position: fixed; top: 0; width: 100%; }
+  }
+</style>
+
+</body>
+</html>

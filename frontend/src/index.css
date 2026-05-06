@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=Noto+Sans:wght@300;400;500;700&display=swap');
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { @apply bg-teal-light text-teal font-sans antialiased; }
+  * { @apply box-border; }
+  h1,h2,h3,h4,h5 { @apply font-semibold tracking-tight; }
+}
+
+@layer components {
+  /* ── Buttons ── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-primary text-white
+           px-5 py-2.5 rounded-lg font-semibold text-sm
+           hover:bg-primary-dark active:scale-95
+           transition-all duration-150 shadow-btn
+           disabled:opacity-50 disabled:cursor-not-allowed
+           focus-visible:ring-2 focus-visible:ring-primary;
+  }
+  .btn-cta {
+    @apply inline-flex items-center justify-center gap-2 bg-cta text-white
+           px-6 py-3 rounded-lg font-bold text-sm
+           hover:bg-cta-dark active:scale-95
+           transition-all duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 border-2 border-primary text-primary
+           px-5 py-2.5 rounded-lg font-semibold text-sm
+           hover:bg-primary hover:text-white active:scale-95
+           transition-all duration-150;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 text-teal
+           px-4 py-2 rounded-lg font-medium text-sm
+           hover:bg-teal-mid active:scale-95 transition-all duration-150;
+  }
+
+  /* ── Inputs ── */
+  .input {
+    @apply w-full border border-teal-mid rounded-lg px-4 py-2.5 text-sm bg-white text-teal
+           placeholder:text-gray-400
+           focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
+           transition-all duration-150;
+  }
+  .label { @apply block text-xs font-semibold text-teal mb-1.5 uppercase tracking-wide; }
+
+  /* ── Cards ── */
+  .card        { @apply bg-white rounded-xl shadow-card border border-teal-mid/40 overflow-hidden; }
+  .card-hover  { @apply card hover:shadow-card-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer; }
+
+  /* ── Badges ── */
+  .badge      { @apply inline-flex items-center text-xs font-bold px-2 py-0.5 rounded-md; }
+  .badge-rx   { @apply badge bg-red-50    text-red-600   border border-red-100; }
+  .badge-off  { @apply badge bg-cta-light text-cta-dark  border border-cta/20; }
+  .badge-new  { @apply badge bg-primary-light text-primary-dark border border-primary/20; }
+  .badge-oos  { @apply badge bg-gray-100 text-gray-500; }
+
+  /* ── Layout ── */
+  .section   { @apply py-16 px-4; }
+  .container { @apply max-w-7xl mx-auto; }
+  .section-hd  { @apply text-2xl md:text-3xl font-bold text-teal mb-1; }
+  .section-sub { @apply text-sm text-gray-500 mt-1; }
+  .divider     { @apply border-t border-teal-mid/50; }
+  .skeleton    { @apply bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 animate-pulse rounded-lg; }
+}
+
+@layer utilities {
+  .scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+}
+
+/* Swiper */
+.swiper-button-next,
+.swiper-button-prev { display: none !important; }
+.category-swiper .swiper-wrapper { transition-timing-function: linear !important; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
