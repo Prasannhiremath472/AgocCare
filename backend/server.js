@@ -55,9 +55,8 @@ app.get('/', (req, res) => {
 app.get('/api/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 
 // Upload diagnostic route — remove after confirming uploads work
-const upload = require('./middleware/upload');
 const fs = require('fs');
-const path = require('path');
+const upload = require('./middleware/upload');
 app.post('/api/test-upload', upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'No file received', body: req.body });
   res.json({ message: 'Upload OK', file: req.file.filename, path: req.file.path });
