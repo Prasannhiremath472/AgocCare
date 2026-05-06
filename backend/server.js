@@ -46,6 +46,10 @@ app.use('/api/admin',        adminRoutes);
 app.use('/api/prescription', prescriptionRoutes);
 app.use('/api/analytics',    analyticsRoutes);
 
+app.get('/', (req, res) => {
+  res.send('AgocCare Backend Running Successfully');
+});
+
 app.get('/api/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 
 // Global Express error handler — catches any thrown errors in routes
