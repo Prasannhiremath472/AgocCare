@@ -54,6 +54,20 @@ app.get('/', (req, res) => {
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 
+// Upload diagnostic route — remove after confirming uploads work
+const upload = require('./middleware/upload');
+const fs = require('fs');
+const path = require('path');
+app.post('/api/test-upload', upload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ message: 'No file received', body: req.body });
+  res.json({ message: 'Upload OK', file: req.file.filename, path: req.file.path });
+});
+app.get('/api/test-upload', (req, res) => {
+  const uploadDir = path.join(__dirname, 'uploads');
+  const files = fs.existsSync(uploadDir) ? fs.readdirSync(uploadDir) : [];
+  res.json({ uploadDir, files, writable: (() => { try { fs.accessSync(uploadDir, fs.constants.W_OK); return true; } catch { return false; } })() });
+});
+
 // Global Express error handler — catches any thrown errors in routes
 app.use((err, req, res, next) => {
   console.error('[Express Error]', err.message);
