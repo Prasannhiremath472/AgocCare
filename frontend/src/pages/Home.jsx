@@ -368,7 +368,7 @@ export default function Home() {
       {/* ══════════════════════════════════════
           OFFER BANNERS
       ══════════════════════════════════════ */}
-      <section className="section bg-teal-light">
+      <section id="offers" className="section bg-teal-light">
         <div className="container mx-auto">
           <motion.div className="flex items-end justify-between mb-8"
             initial="hidden" whileInView="visible" viewport={viewport} variants={fadeUp}>

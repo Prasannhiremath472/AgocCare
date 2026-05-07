@@ -92,9 +92,6 @@ export default function ProductCard({ product }) {
             <span className="text-[10px] text-gray-400 line-through">{formatPrice(product.mrp)}</span>
           )}
         </div>
-        {disc > 0 && (
-          <p className="text-[10px] font-semibold text-cta">{disc}% off</p>
-        )}
 
         {/* Add to cart */}
         <motion.button
