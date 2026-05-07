@@ -30,6 +30,8 @@ app.set('trust proxy', 1);
 
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  'https://agoccarepvtltd.com',
+  'https://www.agoccarepvtltd.com',
   'https://palevioletred-buffalo-883797.hostingersite.com',
   'http://localhost:5173',
   'http://localhost:4173',
