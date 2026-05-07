@@ -4,24 +4,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        // ── Agoc Care brand palette (from logo) ──────────────────
+        // ── AgocCare brand palette — extracted from logo ──────────
+        // Logo colors: Navy #1A3A6B | Cyan #00AEEF | Green #39B54A | White #FFFFFF
         primary: {
-          DEFAULT: '#1B4B8A',   // Navy blue — main logo color
-          dark:    '#133872',
-          light:   '#E8F0F9',
-          50:      '#E8F0F9',
-          100:     '#C5D5EE',
-          200:     '#9EBADF',
-          300:     '#6C96CC',
-          400:     '#3D74B8',
-          500:     '#1B4B8A',
-          600:     '#133872',
-          700:     '#0D2857',
-          800:     '#081A3C',
-          900:     '#040E21',
+          DEFAULT: '#1A3A6B',   // Navy blue — logo ring & "PVT. LTD."
+          dark:    '#122B52',
+          light:   '#E8EFF9',
+          50:      '#E8EFF9',
+          100:     '#C3D2EC',
+          200:     '#96B0D9',
+          300:     '#638DC3',
+          400:     '#3868AE',
+          500:     '#1A3A6B',
+          600:     '#122B52',
+          700:     '#0C1E3A',
+          800:     '#071224',
+          900:     '#030810',
         },
-        cyan: {
-          DEFAULT: '#00AEEF',   // Cyan arc in logo
+        secondary: {
+          DEFAULT: '#00AEEF',   // Cyan blue — logo "AGOC" text & icon arc
           dark:    '#0090C9',
           light:   '#E0F6FD',
           50:      '#E0F6FD',
@@ -29,21 +30,24 @@ export default {
           500:     '#00AEEF',
           600:     '#0090C9',
         },
+        cta: {
+          DEFAULT: '#39B54A',   // Green — logo "CARE" text & "empowering life"
+          dark:    '#2A8C37',
+          light:   '#E8F6EA',
+        },
         brand: {
-          green:   '#39B54A',   // Green arc + tagline
+          navy:          '#1A3A6B',
+          cyan:          '#00AEEF',
+          green:         '#39B54A',
           'green-dark':  '#2A8C37',
           'green-light': '#E8F6EA',
-          navy:    '#1B4B8A',
-          cyan:    '#00AEEF',
-          gray:    '#4D4D4D',
+          gray:          '#4D4D4D',
         },
-        // Keep these for component compatibility
-        secondary: { DEFAULT: '#00AEEF', light: '#E0F6FD', dark: '#0090C9' },
-        cta:       { DEFAULT: '#39B54A', dark: '#2A8C37', light: '#E8F6EA' },
+        // teal = alias for body text/bg (navy-based for consistency)
         teal: {
-          DEFAULT: '#1B3A5C',
+          DEFAULT: '#1A3A6B',
           light:   '#EEF4FB',
-          mid:     '#C5D5EE',
+          mid:     '#C3D2EC',
         },
       },
       fontFamily: { sans: ['Figtree', 'Noto Sans', 'system-ui', 'sans-serif'] },
@@ -56,7 +60,8 @@ export default {
       animation: {
         'fade-up':  'fadeUp .45s ease both',
         'fade-in':  'fadeIn .35s ease both',
-        marquee:    'marquee 30s linear infinite',
+        marquee:      'marquee 30s linear infinite',
+        'marquee-slow':'marquee 50s linear infinite',
       },
       keyframes: {
         fadeUp:  { from: { opacity: 0, transform: 'translateY(14px)' }, to: { opacity: 1, transform: 'translateY(0)' } },

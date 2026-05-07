@@ -5,78 +5,100 @@ import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
 
 const CATEGORIES_META = {
-  tablets:           { icon: '💊', gradient: 'from-blue-500   to-blue-600'   },
-  syrups:            { icon: '🍶', gradient: 'from-amber-500  to-amber-600'  },
-  capsules:          { icon: '💉', gradient: 'from-purple-500 to-purple-600' },
-  injections:        { icon: '🩺', gradient: 'from-red-500    to-red-600'    },
-  vitamins:          { icon: '⚡', gradient: 'from-yellow-500 to-yellow-600' },
-  skincare:          { icon: '🌿', gradient: 'from-green-500  to-green-600'  },
-  'medical-devices': { icon: '🔬', gradient: 'from-teal-500   to-teal-600'   },
+  tablets: {
+    image: 'https://images.unsplash.com/photo-1550572017-edd951b55104?w=300&q=80',
+    bg: 'bg-blue-50',
+  },
+  syrups: {
+    image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=300&q=80',
+    bg: 'bg-amber-50',
+  },
+  capsules: {
+    image: 'https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=300&q=80',
+    bg: 'bg-purple-50',
+  },
+  injections: {
+    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&q=80',
+    bg: 'bg-red-50',
+  },
+  vitamins: {
+    image: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=300&q=80',
+    bg: 'bg-yellow-50',
+  },
+  skincare: {
+    image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=300&q=80',
+    bg: 'bg-green-50',
+  },
+  'medical-devices': {
+    image: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=300&q=80',
+    bg: 'bg-teal-50',
+  },
+};
+
+const DEFAULT = {
+  image: 'https://images.unsplash.com/photo-1550572017-edd951b55104?w=300&q=80',
+  bg: 'bg-gray-50',
 };
 
 export default function CategorySlider({ categories = [] }) {
   if (!categories.length) return (
-    <div className="flex gap-4">
-      {Array(5).fill(0).map((_, i) => (
+    <div className="flex gap-6">
+      {Array(6).fill(0).map((_, i) => (
         <div key={i} className="flex flex-col items-center gap-3 flex-1">
-          <div className="skeleton w-[88px] h-[88px] rounded-2xl mx-auto"/>
-          <div className="skeleton h-3 w-16 rounded mx-auto"/>
+          <div className="skeleton w-36 h-36 rounded-full mx-auto" />
+          <div className="skeleton h-3 w-16 rounded mx-auto" />
         </div>
       ))}
     </div>
   );
 
-  // Duplicate slides for seamless infinite loop
   const slides = [...categories, ...categories, ...categories];
 
   return (
     <Swiper
       modules={[Autoplay]}
-      slidesPerView={5}
-      spaceBetween={20}
       loop={true}
       speed={3000}
-      autoplay={{
-        delay: 0,
-        disableOnInteraction: false,
-        pauseOnMouseEnter: true,
-      }}
+      autoplay={{ delay: 0, disableOnInteraction: false, pauseOnMouseEnter: true }}
       allowTouchMove={true}
       breakpoints={{
-        0:    { slidesPerView: 3, spaceBetween: 12 },
-        480:  { slidesPerView: 4, spaceBetween: 14 },
-        768:  { slidesPerView: 5, spaceBetween: 18 },
-        1024: { slidesPerView: 5, spaceBetween: 22 },
-        1280: { slidesPerView: 6, spaceBetween: 24 },
+        0:    { slidesPerView: 3, spaceBetween: 16 },
+        480:  { slidesPerView: 4, spaceBetween: 20 },
+        768:  { slidesPerView: 5, spaceBetween: 24 },
+        1024: { slidesPerView: 6, spaceBetween: 28 },
+        1280: { slidesPerView: 7, spaceBetween: 32 },
       }}
       className="!overflow-hidden category-swiper"
     >
       {slides.map((cat, i) => {
-        const meta = CATEGORIES_META[cat.slug] || {
-          icon: '💊', gradient: 'from-primary to-primary-dark',
-        };
-
+        const meta = CATEGORIES_META[cat.slug] || DEFAULT;
         return (
           <SwiperSlide key={`${cat.id}-${i}`}>
             <Link to={`/medicines?category=${cat.slug}`}>
               <motion.div
-                className="flex flex-col items-center gap-3 cursor-pointer py-2"
+                className="flex flex-col items-center gap-3 py-3 cursor-pointer"
                 whileHover={{ y: -6, transition: { duration: 0.2 } }}
               >
-                {/* Icon */}
+                {/* Circle image */}
                 <motion.div
-                  className={`w-[88px] h-[88px] rounded-2xl bg-gradient-to-br ${meta.gradient}
-                              flex items-center justify-center shadow-md mx-auto relative overflow-hidden`}
-                  whileHover={{ scale: 1.08 }}
+                  className={`w-36 h-36 rounded-full ${meta.bg} mx-auto overflow-hidden
+                              border-2 border-transparent hover:border-primary
+                              shadow-md transition-all duration-200 relative`}
+                  whileHover={{ scale: 1.08, boxShadow: '0 8px 24px rgba(26,58,107,0.18)' }}
                   transition={{ type: 'spring', stiffness: 280, damping: 18 }}
                 >
-                  <span className="text-[42px] leading-none select-none">{meta.icon}</span>
-                  {/* Shine overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/25 to-transparent pointer-events-none"/>
+                  <img
+                    src={meta.image}
+                    alt={cat.name}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  {/* Hover tint */}
+                  <div className="absolute inset-0 bg-primary/0 hover:bg-primary/10 transition-colors duration-200 rounded-full" />
                 </motion.div>
 
                 {/* Label */}
-                <span className="text-[13px] font-semibold text-teal text-center leading-tight">
+                <span className="text-[13px] font-bold text-teal text-center leading-tight hover:text-primary transition-colors">
                   {cat.name}
                 </span>
               </motion.div>

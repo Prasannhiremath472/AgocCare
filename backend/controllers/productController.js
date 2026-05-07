@@ -78,7 +78,7 @@ exports.getFeatured = async (req, res) => {
       `SELECT p.id, p.name, p.slug, p.price, p.mrp, p.image, p.prescription_required,
               c.name as category
        FROM products p LEFT JOIN categories c ON p.category_id = c.id
-       WHERE p.is_active = 1 ORDER BY p.created_at DESC LIMIT 8`
+       WHERE p.is_active = 1 ORDER BY p.created_at DESC LIMIT 6`
     );
     res.json(products);
   } catch (err) {

@@ -41,10 +41,12 @@ const CATEGORIES_META = {
 };
 
 const WHY = [
-  { icon:'✅', title:'100% Genuine',   sub:'Sourced directly from licensed manufacturers.' },
-  { icon:'⚡', title:'Fast Delivery',  sub:'Same-day dispatch on orders placed before 2 PM.' },
-  { icon:'🔒', title:'Secure Payment', sub:'128-bit encrypted checkout via Razorpay.' },
-  { icon:'📞', title:'24/7 Support',   sub:'Pharmacists available around the clock.' },
+  { icon:'✅', title:'100% Genuine',        sub:'Sourced directly from licensed manufacturers and verified brands.' },
+  { icon:'⚡', title:'Fast Delivery',        sub:'Quick dispatch with reliable courier partners across India.' },
+  { icon:'🔒', title:'Secure Payments',      sub:'128-bit encrypted checkout via Razorpay. Safe & trusted.' },
+  { icon:'📞', title:'Licensed Pharmacists', sub:'Expert support available Mon–Sat, 9 AM to 7 PM.' },
+  { icon:'↩️', title:'Easy Returns',         sub:'7-day return for damaged or wrong products delivered.' },
+  { icon:'💬', title:'WhatsApp Support',     sub:'Reach us instantly: +91 91589 90002.' },
 ];
 
 const STATS = [
@@ -56,13 +58,13 @@ const STATS = [
 
 const HERO_SLIDES = [
   {
-    eyebrow:'Trusted by 2 Million+ Indians',
+    eyebrow:'Pharma Marketing · Wholesale · Retail',
     title:'Your Health,\nDelivered Fast',
-    sub:'Genuine medicines & healthcare products at your doorstep. Order by 2 PM for same-day dispatch.',
+    sub:'Genuine medicines & healthcare products at your doorstep. Call us: +91 99232 68310.',
     cta:'Shop Now', ctaTo:'/medicines',
-    cta2:'Upload Prescription', cta2To:'/medicines',
-    bg:'from-primary/10 via-teal-light to-secondary/10',
-    pill:'bg-primary',
+    cta2:'Upload Prescription', cta2To:'/prescription',
+    image:'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=1200&q=80',
+    overlay:'from-primary/90 via-primary/70 to-primary/40',
   },
   {
     eyebrow:'50,000+ Products',
@@ -70,17 +72,17 @@ const HERO_SLIDES = [
     sub:'Power your immunity with certified vitamins, minerals and nutritional supplements.',
     cta:'Explore Vitamins', ctaTo:'/medicines?category=vitamins',
     cta2:'View All', cta2To:'/medicines',
-    bg:'from-cta/10 via-teal-light to-primary/10',
-    pill:'bg-cta',
+    image:'https://images.unsplash.com/photo-1550572017-edd951b55104?w=1200&q=80',
+    overlay:'from-cta/90 via-cta/70 to-cta/30',
   },
   {
     eyebrow:'Dermatologist Approved',
     title:'Premium\nSkincare Range',
     sub:'Science-backed skincare for every skin type. Shop trusted brands at best prices.',
     cta:'Shop Skincare', ctaTo:'/medicines?category=skincare',
-    cta2:'Learn More', cta2To:'/medicines',
-    bg:'from-purple-100 via-teal-light to-primary/10',
-    pill:'bg-purple-500',
+    cta2:'Learn More', cta2To:'/about',
+    image:'https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=1200&q=80',
+    overlay:'from-secondary/90 via-secondary/70 to-secondary/30',
   },
 ];
 
@@ -98,7 +100,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getFeatured().then(r => setFeatured(r.data)).catch(() => {});
+    getFeatured().then(r => setFeatured(r.data.slice(0, 6))).catch(() => {});
     getCategories().then(r => setCategories(r.data)).catch(() => {});
   }, []);
 
@@ -122,87 +124,112 @@ export default function Home() {
       </Helmet>
 
       {/* ══════════════════════════════════════
-          HERO
+          HERO — Full-image carousel
       ══════════════════════════════════════ */}
-      <section className={`bg-gradient-to-br ${current.bg} transition-colors duration-700 overflow-hidden relative`}>
-        {/* floating blobs */}
-        <motion.div
-          className="absolute -top-20 -right-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl pointer-events-none"
-          animate={{ scale:[1,1.15,1], opacity:[0.5,0.8,0.5] }}
-          transition={{ duration:6, repeat:Infinity, ease:'easeInOut' }}
-        />
-        <motion.div
-          className="absolute bottom-0 -left-20 w-64 h-64 bg-secondary/10 rounded-full blur-3xl pointer-events-none"
-          animate={{ scale:[1,1.2,1], opacity:[0.4,0.7,0.4] }}
-          transition={{ duration:8, repeat:Infinity, ease:'easeInOut', delay:1 }}
-        />
+      <section className="relative h-[580px] md:h-[640px] overflow-hidden">
+        {/* Background images */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={slide}
+            className="absolute inset-0"
+            initial={{ opacity: 0, scale: 1.06 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <img
+              src={current.image}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+            {/* gradient overlay */}
+            <div className={`absolute inset-0 bg-gradient-to-r ${current.overlay}`} />
+            {/* bottom fade */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+          </motion.div>
+        </AnimatePresence>
 
-        <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={slide}
-              className="max-w-3xl mx-auto text-center"
-              initial="hidden" animate="visible" exit={{ opacity:0, y:-20, transition:{ duration:0.25 } }}
-              variants={staggerContainer(0.12, 0)}
-            >
-              <motion.span
-                variants={popIn}
-                className={`inline-block ${current.pill} text-white text-xs font-bold px-4 py-1.5 rounded-full mb-5 shadow-btn`}
+        {/* Content */}
+        <div className="relative z-10 h-full flex flex-col justify-center">
+          <div className="container mx-auto px-4">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={slide}
+                className="max-w-3xl mx-auto text-center"
+                initial="hidden" animate="visible"
+                exit={{ opacity: 0, x: -30, transition: { duration: 0.25 } }}
+                variants={staggerContainer(0.12, 0)}
               >
-                {current.eyebrow}
-              </motion.span>
+                <motion.span variants={popIn}
+                  className="inline-block bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-bold px-4 py-1.5 rounded-full mb-5">
+                  {current.eyebrow}
+                </motion.span>
 
-              <motion.h1
-                variants={fadeUp}
-                className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-teal leading-tight mb-5 whitespace-pre-line"
-              >
-                {current.title}
-              </motion.h1>
+                <motion.h1 variants={fadeUp}
+                  className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-5 whitespace-pre-line drop-shadow-lg">
+                  {current.title}
+                </motion.h1>
 
-              <motion.p variants={fadeUp} className="text-gray-500 text-base md:text-lg mb-8 max-w-xl mx-auto">
-                {current.sub}
-              </motion.p>
+                <motion.p variants={fadeUp}
+                  className="text-white/85 text-base md:text-lg mb-8 max-w-xl mx-auto leading-relaxed">
+                  {current.sub}
+                </motion.p>
 
-              {/* Search */}
-              <motion.form
-                variants={scaleIn}
-                onSubmit={handleSearch}
-                className="flex gap-2 max-w-lg mx-auto bg-white rounded-2xl shadow-card-lg p-2 mb-8"
-              >
-                <div className="relative flex-1">
-                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
-                  </svg>
-                  <input value={search} onChange={e => setSearch(e.target.value)}
-                    placeholder="Search medicines, brands..."
-                    className="w-full pl-9 pr-3 py-2.5 text-sm bg-transparent text-teal placeholder:text-gray-400 focus:outline-none"/>
-                </div>
-                <motion.button type="submit" whileTap={{ scale:0.95 }} className="btn-primary px-6 text-sm">
-                  Search
-                </motion.button>
-              </motion.form>
+                {/* Search bar */}
+                <motion.form variants={scaleIn} onSubmit={handleSearch}
+                  className="flex gap-2 max-w-lg mx-auto bg-white rounded-2xl shadow-2xl p-2 mb-7">
+                  <div className="relative flex-1">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+                    </svg>
+                    <input value={search} onChange={e => setSearch(e.target.value)}
+                      placeholder="Search medicines, brands..."
+                      className="w-full pl-9 pr-3 py-2.5 text-sm bg-transparent text-teal placeholder:text-gray-400 focus:outline-none"/>
+                  </div>
+                  <motion.button type="submit" whileTap={{ scale: 0.95 }} className="btn-primary px-6 text-sm shrink-0">
+                    Search
+                  </motion.button>
+                </motion.form>
 
-              <motion.div variants={fadeUp} className="flex items-center justify-center gap-3 flex-wrap">
-                <motion.div whileHover={{ scale:1.04 }} whileTap={{ scale:0.97 }}>
-                  <Link to={current.ctaTo}  className="btn-primary  px-7 py-3">{current.cta}</Link>
-                </motion.div>
-                <motion.div whileHover={{ scale:1.04 }} whileTap={{ scale:0.97 }}>
-                  <Link to={current.cta2To} className="btn-outline  px-7 py-3">{current.cta2}</Link>
+                <motion.div variants={fadeUp} className="flex items-center justify-center gap-3 flex-wrap">
+                  <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                    <Link to={current.ctaTo} className="btn-primary px-7 py-3 shadow-2xl">{current.cta}</Link>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                    <Link to={current.cta2To}
+                      className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/30 text-white font-semibold px-7 py-3 rounded-lg hover:bg-white/25 transition-all text-sm">
+                      {current.cta2}
+                    </Link>
+                  </motion.div>
                 </motion.div>
               </motion.div>
-            </motion.div>
-          </AnimatePresence>
+            </AnimatePresence>
+          </div>
 
-          {/* Slide dots */}
-          <div className="flex justify-center gap-2 mt-10">
+          {/* Slide controls */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3">
             {HERO_SLIDES.map((_, i) => (
               <motion.button key={i} onClick={() => setSlide(i)}
-                animate={{ width: i === slide ? 28 : 8, backgroundColor: i === slide ? '#0891B2' : '#BAE6FD' }}
+                animate={{ width: i === slide ? 32 : 8, backgroundColor: i === slide ? '#ffffff' : 'rgba(255,255,255,0.4)' }}
                 transition={{ duration: 0.3 }}
                 className="h-2 rounded-full"
               />
             ))}
           </div>
+
+          {/* Prev / Next arrows */}
+          <button onClick={() => setSlide(s => (s - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)}
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white hover:bg-white/35 transition-colors">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <button onClick={() => setSlide(s => (s + 1) % HERO_SLIDES.length)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white hover:bg-white/35 transition-colors">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
         </div>
       </section>
 
@@ -233,6 +260,89 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
+
+      {/* ══════════════════════════════════════
+          ABOUT US SNAPSHOT
+      ══════════════════════════════════════ */}
+      <section className="section bg-white overflow-hidden">
+        <div className="container mx-auto">
+          <motion.div className="grid md:grid-cols-2 gap-12 items-center"
+            variants={staggerContainer(0.12)} initial="hidden" whileInView="visible" viewport={viewport}>
+
+            {/* Image side */}
+            <motion.div variants={fadeLeft} className="relative">
+              <div className="relative rounded-3xl overflow-hidden shadow-card-lg aspect-[4/3]">
+                <img
+                  src="https://images.unsplash.com/photo-1576671081837-49000212a370?w=800&q=80"
+                  alt="Agoc Care pharmacy"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent" />
+              </div>
+              {/* Est. badge */}
+              <motion.div
+                variants={popIn}
+                className="absolute -bottom-5 -right-5 bg-white rounded-2xl shadow-card-lg px-6 py-4 border border-teal-mid/30 text-center"
+              >
+                <p className="text-3xl font-extrabold text-primary">2016</p>
+                <p className="text-xs text-gray-500 font-semibold mt-0.5">Est. Since</p>
+              </motion.div>
+              {/* Drug license badge */}
+              <motion.div
+                variants={popIn}
+                className="absolute -top-4 -left-4 bg-cta rounded-2xl shadow-card-lg px-4 py-3 text-white text-center"
+              >
+                <svg className="w-6 h-6 mx-auto mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+                <p className="text-[10px] font-bold leading-tight">Licensed<br/>Pharmacy</p>
+              </motion.div>
+            </motion.div>
+
+            {/* Text side */}
+            <motion.div variants={fadeRight}>
+              <motion.p variants={fadeUp} className="text-xs font-bold text-primary uppercase tracking-widest mb-2">
+                About Agoc Care
+              </motion.p>
+              <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-extrabold text-teal leading-tight mb-4">
+                Empowering Life Through<br/>
+                <span className="text-secondary">Genuine Healthcare</span>
+              </motion.h2>
+              <motion.p variants={fadeUp} className="text-gray-500 leading-relaxed mb-4">
+                Founded in 2016 by <strong className="text-teal">Satyajeet Kadavekar</strong>, Agoc Care Private Limited is a licensed pharma product marketing, wholesale, and retail company. We are committed to making authentic, affordable healthcare products accessible to every individual across India.
+              </motion.p>
+              <motion.p variants={fadeUp} className="text-gray-500 leading-relaxed mb-6">
+                Based in Kolhapur, Maharashtra, we operate with full drug licensing and GSTIN registration, ensuring every product you receive is genuine, safe, and within its validity.
+              </motion.p>
+
+              {/* Key points */}
+              <motion.div variants={staggerContainer(0.08)} className="grid grid-cols-2 gap-3 mb-7">
+                {[
+                  { icon:'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', label:'100% Licensed & Genuine' },
+                  { icon:'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z', label:'Kolhapur, Maharashtra' },
+                  { icon:'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', label:'Mon–Sat 9 AM – 7 PM' },
+                  { icon:'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z', label:'+91 99232 68310' },
+                ].map(p => (
+                  <motion.div key={p.label} variants={staggerItem}
+                    className="flex items-center gap-2.5 bg-teal-light rounded-xl px-3 py-2.5 border border-teal-mid/30">
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <svg className="w-3.5 h-3.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={p.icon}/>
+                      </svg>
+                    </div>
+                    <span className="text-xs font-semibold text-teal">{p.label}</span>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              <motion.div variants={fadeUp} className="flex gap-3 flex-wrap">
+                <Link to="/about" className="btn-primary px-6">Learn More About Us</Link>
+                <Link to="/medicines" className="btn-outline px-6">Browse Products</Link>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* ══════════════════════════════════════
           CATEGORIES
@@ -324,8 +434,8 @@ export default function Home() {
           </motion.div>
 
           {featured.length === 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {Array(8).fill(0).map((_, i) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {Array(6).fill(0).map((_, i) => (
                 <div key={i} className="card">
                   <div className="skeleton aspect-square"/>
                   <div className="p-3 space-y-2">
@@ -337,7 +447,7 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
               {featured.map((p, i) => (
                 <motion.div
                   key={p.id}
@@ -370,30 +480,26 @@ export default function Home() {
             <p className="section-sub max-w-md mx-auto">Committed to making healthcare accessible, affordable and reliable for every Indian.</p>
           </motion.div>
 
-          <motion.div
-            className="grid sm:grid-cols-2 md:grid-cols-4 gap-5"
-            initial="hidden" whileInView="visible" viewport={viewport}
-            variants={staggerContainer(0.1)}
-          >
-            {WHY.map((w, i) => (
-              <motion.div
-                key={w.title}
-                variants={staggerItem}
-                whileHover={{ y:-6, boxShadow:'0 16px 40px rgba(8,145,178,.12)', transition:{ duration:0.2 } }}
-                className="card p-6 flex flex-col items-start gap-3 cursor-default"
-              >
-                <motion.div
-                  className="w-12 h-12 bg-primary-light rounded-xl flex items-center justify-center text-2xl"
-                  whileHover={{ scale:1.15, backgroundColor:'#0891B2' }}
-                  transition={{ type:'spring', stiffness:300, damping:15 }}
+          {/* Continuous marquee slider */}
+          <div className="overflow-hidden w-full">
+            <div
+              className="flex gap-5"
+              style={{ animation: 'marquee 40s linear infinite', width: 'max-content' }}
+            >
+              {[...WHY, ...WHY, ...WHY, ...WHY].map((w, i) => (
+                <div
+                  key={i}
+                  className="flex flex-col items-start gap-3 bg-white rounded-2xl p-6 shadow-card border border-teal-mid/30 cursor-default shrink-0 w-72"
                 >
-                  {w.icon}
-                </motion.div>
-                <h3 className="font-bold text-teal">{w.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{w.sub}</p>
-              </motion.div>
-            ))}
-          </motion.div>
+                  <div className="w-12 h-12 bg-primary-light rounded-xl flex items-center justify-center text-2xl shrink-0">
+                    {w.icon}
+                  </div>
+                  <h3 className="font-bold text-teal">{w.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{w.sub}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
