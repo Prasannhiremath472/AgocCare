@@ -65,7 +65,13 @@ exports.getProductBySlug = async (req, res) => {
       [req.params.slug]
     );
     if (!rows.length) return res.status(404).json({ message: 'Product not found' });
-    res.json(rows[0]);
+    const product = rows[0];
+    const [images] = await query(
+      `SELECT image_path FROM product_images WHERE product_id = ? ORDER BY sort_order ASC`,
+      [product.id]
+    );
+    product.images = images.map(i => i.image_path);
+    res.json(product);
   } catch (err) {
     console.error('[getProductBySlug]', err.message);
     res.status(500).json({ message: 'Failed to fetch product' });
