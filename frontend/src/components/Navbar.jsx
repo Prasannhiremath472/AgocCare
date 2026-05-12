@@ -118,7 +118,7 @@ export default function Navbar() {
           {/* ── Logo ── */}
           <Link to="/" className="flex items-center shrink-0">
             <motion.img
-              src="/logo.png"
+              src="/Agoccarelogo.jpeg"
               alt="AgocCare"
               className="h-10 w-auto object-contain"
               whileHover={{ scale: 1.05 }}
@@ -136,37 +136,36 @@ export default function Navbar() {
               placeholder="Search medicines..."
               className="flex-1 px-2.5 py-2 text-sm bg-transparent text-teal placeholder:text-gray-400 focus:outline-none min-w-0"/>
             <button type="submit"
-              className="shrink-0 bg-primary hover:bg-primary-dark text-white text-xs font-bold px-4 py-2.5 transition-colors">
+              className="shrink-0 text-white text-xs font-bold px-4 py-2.5 transition-all hover:opacity-90"
+              style={{ backgroundColor: '#044b99' }}>
               Search
             </button>
           </form>
 
           {/* ── Desktop nav ── */}
-          <nav className="hidden lg:flex items-center gap-0.5 ml-auto">
+          <nav className="hidden lg:flex items-center gap-2 ml-auto">
 
-            {/* Home */}
+            {/* Home — #044b99 */}
             <Link to="/"
-              className={`flex items-center gap-1.5 text-[13px] px-3 py-2 rounded-lg transition-colors ${active('/')}`}>
+              className="text-[13px] px-4 py-2 rounded-lg font-semibold text-white transition-all duration-150 hover:opacity-90 hover:scale-105 active:scale-95"
+              style={{ backgroundColor: '#044b99' }}>
               Home
             </Link>
 
-            {/* About */}
+            {/* About — #079DDF */}
             <Link to="/about"
-              className={`text-[13px] px-3 py-2 rounded-lg transition-colors ${active('/about')}`}>
+              className="text-[13px] px-4 py-2 rounded-lg font-semibold text-white transition-all duration-150 hover:opacity-90 hover:scale-105 active:scale-95"
+              style={{ backgroundColor: '#079DDF' }}>
               About
             </Link>
 
-            {/* Categories dropdown */}
+            {/* Products — #044b99 */}
             <div ref={catRef} className="relative">
-              <button onClick={() => { setCatOpen(v => !v); setUserOpen(false); }}
-                className={`flex items-center gap-1.5 text-[13px] px-3 py-2 rounded-lg transition-colors
-                  ${catOpen ? 'text-primary bg-primary-light' : 'text-gray-600 hover:text-primary hover:bg-gray-50'}`}>
-                Categories
-                <motion.svg animate={{ rotate: catOpen ? 180 : 0 }} transition={{ duration: 0.2 }}
-                  className="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7"/>
-                </motion.svg>
-              </button>
+              <Link to="/medicines"
+                className="flex items-center gap-1.5 text-[13px] px-4 py-2 rounded-lg font-semibold text-white transition-all duration-150 hover:opacity-90 hover:scale-105 active:scale-95"
+                style={{ backgroundColor: '#044b99' }}>
+                Products
+              </Link>
 
               <AnimatePresence>
                 {catOpen && (
@@ -211,15 +210,17 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
 
-            {/* Offers */}
+            {/* Offers — #079DDF */}
             <button onClick={() => { navigate('/'); setTimeout(() => document.getElementById('offers')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
-              className="text-[13px] px-3 py-2 rounded-lg text-gray-600 hover:text-primary transition-colors">
+              className="text-[13px] px-4 py-2 rounded-lg font-semibold text-white transition-all duration-150 hover:opacity-90 hover:scale-105 active:scale-95"
+              style={{ backgroundColor: '#079DDF' }}>
               Offers
             </button>
 
-            {/* Rx Upload */}
+            {/* Rx Upload — #044b99 */}
             <Link to="/prescription"
-              className={`text-[13px] px-3 py-2 rounded-lg transition-colors ${active('/prescription')}`}>
+              className="text-[13px] px-4 py-2 rounded-lg font-semibold text-white transition-all duration-150 hover:opacity-90 hover:scale-105 active:scale-95"
+              style={{ backgroundColor: '#044b99' }}>
               Rx Upload
             </Link>
 
@@ -326,10 +327,15 @@ export default function Navbar() {
             ) : (
               <div className="flex items-center gap-2">
                 <Link to="/login"
-                  className="text-[13px] font-medium text-gray-600 hover:text-primary px-3 py-2 rounded-lg transition-colors">
+                  className="text-[13px] px-4 py-2 rounded-lg font-semibold text-white transition-all duration-150 hover:opacity-90 hover:scale-105 active:scale-95"
+                  style={{ backgroundColor: '#079DDF' }}>
                   Login
                 </Link>
-                <Link to="/register" className="btn-primary text-xs px-4 py-2">Sign Up</Link>
+                <Link to="/register"
+                  className="text-[13px] px-4 py-2 rounded-lg font-semibold text-white transition-all duration-150 hover:opacity-90 hover:scale-105 active:scale-95"
+                  style={{ backgroundColor: '#044b99' }}>
+                  Sign Up
+                </Link>
               </div>
             )}
           </div>

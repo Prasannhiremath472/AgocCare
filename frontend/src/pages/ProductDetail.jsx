@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,16 +8,21 @@ import { formatPrice, discount, imgUrl, galleryUrl } from '../utils/helpers';
 import toast from 'react-hot-toast';
 
 export default function ProductDetail() {
-  const { slug }   = useParams();
-  const [product, setProduct] = useState(null);
-  const [qty, setQty]         = useState(1);
-  const [loading, setLoading] = useState(true);
+  const { slug } = useParams();
+  const [product, setProduct]     = useState(null);
+  const [qty, setQty]             = useState(1);
+  const [loading, setLoading]     = useState(true);
   const [activeImg, setActiveImg] = useState(0);
+  const [expanded, setExpanded]   = useState(false);
+  const [zoomed, setZoomed]       = useState(false);
+  const [zoomPos, setZoomPos]     = useState({ x: 50, y: 50 });
+  const imgRef = useRef(null);
   const addItem = useCartStore(s => s.addItem);
 
   useEffect(() => {
     setLoading(true);
     setActiveImg(0);
+    setExpanded(false);
     getProduct(slug)
       .then(r => { setProduct(r.data); setLoading(false); })
       .catch(() => setLoading(false));
@@ -36,10 +41,23 @@ export default function ProductDetail() {
   );
 
   const disc   = discount(product.price, product.mrp);
-  // Use gallery images if available, fallback to single image
+
+  const handleMouseMove = e => {
+    const rect = imgRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setZoomPos({ x, y });
+  };
+
   const images = product.images?.length
     ? product.images.map(p => galleryUrl(p))
     : [imgUrl(product.image)];
+
+  // Split description: first 3 lines preview, rest expandable
+  const descLines = product.description?.split('\n') || [];
+  const previewLines = descLines.slice(0, 3).join('\n');
+  const hasMore = descLines.length > 3;
 
   return (
     <>
@@ -64,45 +82,63 @@ export default function ProductDetail() {
 
           <div className="grid md:grid-cols-2 gap-8">
 
-            {/* ── Image Gallery ── */}
+            {/* ── Left: Image Gallery ── */}
             <div className="flex flex-col gap-3">
-              {/* Main image */}
-              <div className="bg-white rounded-2xl border border-teal-mid/30 shadow-card overflow-hidden aspect-square flex items-center justify-center relative">
+              <div
+                ref={imgRef}
+                className="bg-white rounded-2xl border border-teal-mid/30 shadow-card overflow-hidden aspect-square flex items-center justify-center relative cursor-crosshair"
+                onMouseEnter={() => setZoomed(true)}
+                onMouseLeave={() => setZoomed(false)}
+                onMouseMove={handleMouseMove}
+              >
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={activeImg}
                     src={images[activeImg]}
                     alt={product.name}
-                    className="max-h-[420px] max-w-full object-contain p-6"
+                    className="max-h-[420px] max-w-full object-contain p-6 select-none"
+                    style={zoomed ? {
+                      transform: 'scale(2.5)',
+                      transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+                      transition: 'transform-origin 0s',
+                    } : { transform: 'scale(1)', transition: 'transform 0.2s ease' }}
                     initial={{ opacity: 0, scale: 0.96 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 1.02 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
                     transition={{ duration: 0.25 }}
                     onError={e => { e.target.src = '/placeholder.webp'; }}
+                    draggable={false}
                   />
                 </AnimatePresence>
 
-                {/* Prev/Next arrows */}
+                {/* Zoom hint */}
+                {!zoomed && (
+                  <div className="absolute bottom-3 right-3 bg-black/50 text-white text-[10px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 pointer-events-none">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                    Hover to Zoom
+                  </div>
+                )}
+
                 {images.length > 1 && (
                   <>
                     <button onClick={() => setActiveImg(i => (i - 1 + images.length) % images.length)}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white border border-gray-200 rounded-full shadow flex items-center justify-center hover:bg-gray-50 transition-colors">
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white border border-gray-200 rounded-full shadow flex items-center justify-center hover:bg-gray-50 transition-colors z-10">
                       <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
                       </svg>
                     </button>
                     <button onClick={() => setActiveImg(i => (i + 1) % images.length)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white border border-gray-200 rounded-full shadow flex items-center justify-center hover:bg-gray-50 transition-colors">
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white border border-gray-200 rounded-full shadow flex items-center justify-center hover:bg-gray-50 transition-colors z-10">
                       <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
                       </svg>
                     </button>
                   </>
                 )}
-
-                {/* Discount badge */}
                 {disc > 0 && (
-                  <span className="absolute top-3 left-3 bg-cta text-white text-xs font-bold px-2.5 py-1 rounded-lg">
+                  <span className="absolute top-3 left-3 bg-cta text-white text-xs font-bold px-2.5 py-1 rounded-lg z-10">
                     {disc}% OFF
                   </span>
                 )}
@@ -112,25 +148,20 @@ export default function ProductDetail() {
               {images.length > 1 && (
                 <div className="flex gap-2 flex-wrap">
                   {images.map((img, i) => (
-                    <motion.button
-                      key={i}
-                      onClick={() => setActiveImg(i)}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                    <motion.button key={i} onClick={() => setActiveImg(i)}
+                      whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                       className={`w-16 h-16 rounded-xl border-2 overflow-hidden bg-white flex items-center justify-center transition-all
-                        ${activeImg === i ? 'border-primary shadow-btn' : 'border-gray-200 hover:border-primary/50'}`}
-                    >
+                        ${activeImg === i ? 'border-primary shadow-btn' : 'border-gray-200 hover:border-primary/50'}`}>
                       <img src={img} alt={`${product.name} ${i + 1}`}
                         className="w-full h-full object-contain p-1"
-                        onError={e => { e.target.src = '/placeholder.webp'; }}
-                      />
+                        onError={e => { e.target.src = '/placeholder.webp'; }}/>
                     </motion.button>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* ── Product Info ── */}
+            {/* ── Right: Info ── */}
             <div className="flex flex-col gap-4">
               {product.prescription_required && (
                 <span className="badge-rx self-start">Prescription Required (Rx)</span>
@@ -139,8 +170,7 @@ export default function ProductDetail() {
               <div>
                 <h1 className="text-2xl md:text-3xl font-extrabold text-teal leading-tight">{product.name}</h1>
                 <p className="text-sm text-gray-500 mt-1">
-                  {product.category}
-                  {product.manufacturer ? ` · ${product.manufacturer}` : ''}
+                  {product.category}{product.manufacturer ? ` · ${product.manufacturer}` : ''}
                 </p>
               </div>
 
@@ -156,34 +186,42 @@ export default function ProductDetail() {
               </div>
 
               {/* Stock */}
-              <p className={`text-sm font-semibold flex items-center gap-1.5
-                ${product.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
+              <p className={`text-sm font-semibold flex items-center gap-1.5 ${product.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
                 <span className={`w-2 h-2 rounded-full ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}/>
                 {product.stock > 0 ? `In Stock (${product.stock} units)` : 'Out of Stock'}
               </p>
 
-              {/* Qty + Add to cart */}
-              {product.stock > 0 && (
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center border-2 border-teal-mid rounded-xl overflow-hidden">
-                    <button onClick={() => setQty(q => Math.max(1, q - 1))}
-                      className="px-4 py-2.5 hover:bg-teal-light font-bold text-teal transition-colors text-lg">−</button>
-                    <span className="px-5 py-2.5 font-bold text-teal border-x-2 border-teal-mid">{qty}</span>
-                    <button onClick={() => setQty(q => Math.min(product.stock, q + 1))}
-                      className="px-4 py-2.5 hover:bg-teal-light font-bold text-teal transition-colors text-lg">+</button>
-                  </div>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                    onClick={() => { addItem(product, qty); toast.success(`${product.name} added to cart!`); }}
-                    className="btn-primary flex-1 py-3 text-base"
-                  >
-                    + Add to Cart
-                  </motion.button>
+              {/* ── Description with expand/collapse ── */}
+              {product.description && (
+                <div className="bg-white rounded-2xl border border-teal-mid/30 p-4">
+                  <h3 className="text-sm font-extrabold text-teal mb-2 flex items-center gap-1.5">
+                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Product Description
+                  </h3>
+                  <AnimatePresence initial={false}>
+                    <motion.p
+                      className="text-gray-600 text-sm leading-relaxed whitespace-pre-line"
+                      animate={{ height: 'auto' }}
+                    >
+                      {expanded ? product.description : previewLines}
+                      {!expanded && hasMore && '...'}
+                    </motion.p>
+                  </AnimatePresence>
+                  {hasMore && (
+                    <button
+                      onClick={() => setExpanded(v => !v)}
+                      className="mt-2 text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                    >
+                      {expanded ? 'Show Less ▲' : 'Read More ▼'}
+                    </button>
+                  )}
                 </div>
               )}
 
               {/* Product details */}
-              <div className="bg-white rounded-2xl border border-teal-mid/30 p-4 space-y-3 text-sm">
+              <div className="bg-white rounded-2xl border border-teal-mid/30 p-4 space-y-2.5 text-sm">
                 {product.composition && (
                   <div className="flex gap-2">
                     <span className="font-bold text-teal w-32 shrink-0">Composition</span>
@@ -208,6 +246,25 @@ export default function ProductDetail() {
                 </div>
               </div>
 
+              {/* Qty + Add to Cart — at the bottom */}
+              {product.stock > 0 && (
+                <div className="flex items-center gap-3 mt-auto">
+                  <div className="flex items-center border-2 border-teal-mid rounded-xl overflow-hidden">
+                    <button onClick={() => setQty(q => Math.max(1, q - 1))}
+                      className="px-4 py-2.5 hover:bg-teal-light font-bold text-teal transition-colors text-lg">−</button>
+                    <span className="px-5 py-2.5 font-bold text-teal border-x-2 border-teal-mid">{qty}</span>
+                    <button onClick={() => setQty(q => Math.min(product.stock, q + 1))}
+                      className="px-4 py-2.5 hover:bg-teal-light font-bold text-teal transition-colors text-lg">+</button>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                    onClick={() => { addItem(product, qty); toast.success(`${product.name} added to cart!`); }}
+                    className="btn-primary flex-1 py-3 text-base">
+                    + Add to Cart
+                  </motion.button>
+                </div>
+              )}
+
               {/* Trust badges */}
               <div className="grid grid-cols-3 gap-2">
                 {[
@@ -225,23 +282,6 @@ export default function ProductDetail() {
               </div>
             </div>
           </div>
-
-          {/* Description */}
-          {product.description && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="bg-white rounded-2xl border border-teal-mid/30 shadow-card p-6 mt-8"
-            >
-              <h2 className="text-lg font-extrabold text-teal mb-4 flex items-center gap-2">
-                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                Product Description
-              </h2>
-              <p className="text-gray-600 leading-relaxed text-sm whitespace-pre-line">{product.description}</p>
-            </motion.div>
-          )}
         </div>
       </div>
     </>

@@ -99,7 +99,7 @@ exports.updateOrderStatus = async (req, res) => {
 // Users
 exports.getAllUsers = async (req, res) => {
   try {
-    const [users] = await db.query('SELECT id, name, email, role, created_at FROM users ORDER BY created_at DESC');
+    const [users] = await db.query('SELECT id, name, email, phone, is_verified, role, created_at FROM users ORDER BY created_at DESC');
     res.json(users);
   } catch {
     res.status(500).json({ message: 'Failed to fetch users' });

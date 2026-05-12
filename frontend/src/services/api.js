@@ -31,7 +31,8 @@ export const getProduct = (slug) => api.get(`/products/${slug}`);
 export const getFeatured = () => api.get('/products/featured');
 export const getCategories = () => api.get('/categories');
 
-export const login = (data) => api.post('/auth/login', data);
+export const loginSendOTP   = (data) => api.post('/auth/login/send-otp', data);
+export const loginVerifyOTP = (data) => api.post('/auth/login/verify-otp', data);
 export const register = (data) => api.post('/auth/register', data);
 export const getMe = () => api.get('/auth/me');
 
@@ -53,6 +54,12 @@ export const adminDashboard = () => api.get('/admin/dashboard');
 export const adminCreateCategory = (data) => api.post('/admin/categories', data);
 
 export const getAnalytics = () => api.get('/analytics');
+
+export const getOffers = () => api.get('/offers');
+export const adminGetOffers = () => api.get('/offers/all');
+export const adminCreateOffer = (data) => api.post('/offers', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const adminUpdateOffer = (id, data) => api.put(`/offers/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const adminDeleteOffer = (id) => api.delete(`/offers/${id}`);
 
 export const extractPrescription = (formData) =>
   api.post('/prescription/extract', formData, { headers: { 'Content-Type': 'multipart/form-data' } });

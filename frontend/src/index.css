@@ -37,14 +37,14 @@
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 text-teal
            px-4 py-2 rounded-lg font-medium text-sm
-           hover:bg-teal-mid active:scale-95 transition-all duration-150;
+           hover:bg-teal-light active:scale-95 transition-all duration-150;
   }
 
   /* ── Inputs ── */
   .input {
     @apply w-full border border-teal-mid rounded-lg px-4 py-2.5 text-sm bg-white text-teal
            placeholder:text-gray-400
-           focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
+           focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent
            transition-all duration-150;
   }
   .label { @apply block text-xs font-semibold text-teal mb-1.5 uppercase tracking-wide; }
@@ -61,8 +61,8 @@
   .badge-oos  { @apply badge bg-gray-100 text-gray-500; }
 
   /* ── Layout ── */
-  .section   { @apply py-16 px-4; }
-  .container { @apply max-w-7xl mx-auto; }
+  .section     { @apply py-16 px-4; }
+  .container   { @apply max-w-7xl mx-auto; }
   .section-hd  { @apply text-2xl md:text-3xl font-bold text-teal mb-1; }
   .section-sub { @apply text-sm text-gray-500 mt-1; }
   .divider     { @apply border-t border-teal-mid/50; }

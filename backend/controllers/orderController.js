@@ -22,6 +22,14 @@ exports.createOrder = async (req, res) => {
       total += product.price * item.qty;
     }
 
+    // Save phone from shipping address to user profile if not already set
+    try {
+      const addr = JSON.parse(shipping_address);
+      if (addr.phone) {
+        await conn.query('UPDATE users SET phone = ? WHERE id = ? AND (phone IS NULL OR phone = "")', [addr.phone, req.user.id]);
+      }
+    } catch {}
+
     const [orderResult] = await conn.query(
       'INSERT INTO orders (user_id, total, status, shipping_address) VALUES (?, ?, "pending", ?)',
       [req.user.id, total.toFixed(2), shipping_address]

@@ -4,17 +4,16 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
 
+const BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+
 const CATEGORIES_META = {
-  tablets:           { image: 'https://images.unsplash.com/photo-1550572017-edd951b55104?w=300&q=80',   bg: 'bg-blue-50'   },
-  syrups:            { image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=300&q=80', bg: 'bg-amber-50'  },
-  capsules:          { image: 'https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=300&q=80', bg: 'bg-purple-50' },
-  injections:        { image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&q=80', bg: 'bg-red-50'    },
-  vitamins:          { image: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=300&q=80', bg: 'bg-yellow-50' },
-  skincare:          { image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=300&q=80',    bg: 'bg-green-50'  },
-  'medical-devices': { image: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=300&q=80',    bg: 'bg-teal-50'   },
+  tablets:    { image: `${BASE}/uploads/1T%20FOL%20MD%20Tab/1.jpg`,      bg: 'bg-blue-50'   },
+  capsules:   { image: `${BASE}/uploads/Folok%20DHA/1.png`,              bg: 'bg-purple-50' },
+  injections: { image: `${BASE}/uploads/Endohope%20AQ%2050mg/1.png`,     bg: 'bg-red-50'    },
+  vitamins:   { image: `${BASE}/uploads/AFC%20Boost/1.jpg`,              bg: 'bg-yellow-50' },
 };
 
-const DEFAULT = { image: 'https://images.unsplash.com/photo-1550572017-edd951b55104?w=300&q=80', bg: 'bg-gray-50' };
+const DEFAULT = { image: `${BASE}/uploads/1T%20FOL%20MD%20Tab/1.jpg`, bg: 'bg-gray-50' };
 
 export default function CategorySlider({ categories = [] }) {
   if (!categories.length) return (
@@ -59,7 +58,7 @@ export default function CategorySlider({ categories = [] }) {
                 <motion.div
                   className={`w-36 h-36 rounded-full mx-auto overflow-hidden ${meta.bg}
                               border-4 border-white shadow-md relative`}
-                  whileHover={{ scale: 1.08, boxShadow: '0 8px 24px rgba(26,58,107,0.18)' }}
+                  whileHover={{ scale: 1.08, boxShadow: '0 8px 24px rgba(4,75,153,0.18)' }}
                   transition={{ type: 'spring', stiffness: 280, damping: 18 }}
                 >
                   <img

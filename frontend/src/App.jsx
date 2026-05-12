@@ -26,6 +26,7 @@ const AdminProducts = lazy(() => import('./pages/admin/Products'));
 const AdminOrders = lazy(() => import('./pages/admin/Orders'));
 const AdminUsers     = lazy(() => import('./pages/admin/Users'));
 const AdminAnalytics = lazy(() => import('./pages/admin/Analytics'));
+const AdminOffers    = lazy(() => import('./pages/admin/Offers'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const AiChat       = lazy(() => import('./pages/AiChat'));
 const Prescription = lazy(() => import('./pages/Prescription'));
@@ -74,6 +75,7 @@ export default function App() {
           <Route path="orders" element={<AdminOrders />} />
           <Route path="users"      element={<AdminUsers />} />
           <Route path="analytics"  element={<AdminAnalytics />} />
+          <Route path="offers"     element={<AdminOffers />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

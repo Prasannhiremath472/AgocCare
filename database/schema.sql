@@ -1,8 +1,6 @@
 -- Medico E-Commerce Database Schema
 -- MySQL 8.0+ optimized for shared hosting
 
-CREATE DATABASE IF NOT EXISTS medico_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE medico_db;
 
 CREATE TABLE users (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

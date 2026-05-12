@@ -63,6 +63,8 @@ export default function AdminUsers() {
               <tr className="bg-gray-50/80 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wide">
                 <th className="px-5 py-3.5">User</th>
                 <th className="px-5 py-3.5">Email</th>
+                <th className="px-5 py-3.5">Mobile</th>
+                <th className="px-5 py-3.5">Verified</th>
                 <th className="px-5 py-3.5">Role</th>
                 <th className="px-5 py-3.5">Joined</th>
               </tr>
@@ -90,6 +92,15 @@ export default function AdminUsers() {
                     </div>
                   </td>
                   <td className="px-5 py-3.5 text-gray-400 text-xs">{u.email}</td>
+                  <td className="px-5 py-3.5 text-gray-600 text-xs font-medium">
+                    {u.phone || <span className="text-gray-300">—</span>}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <span className={`inline-flex items-center text-xs font-bold px-2 py-0.5 rounded-lg border
+                      ${u.is_verified ? 'bg-green-50 text-green-700 border-green-200' : 'bg-amber-50 text-amber-600 border-amber-200'}`}>
+                      {u.is_verified ? '✓ Verified' : '⏳ Pending'}
+                    </span>
+                  </td>
                   <td className="px-5 py-3.5">
                     <span className={`inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-lg border
                       ${u.role === 'admin'

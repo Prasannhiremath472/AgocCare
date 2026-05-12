@@ -22,7 +22,7 @@ export default function ProductCard({ product }) {
 
   return (
     <motion.div
-      whileHover={{ y: -4, boxShadow: '0 16px 40px rgba(26,58,107,.13)', transition: { duration: 0.2 } }}
+      whileHover={{ y: -4, boxShadow: '0 16px 40px rgba(4,75,153,.13)', transition: { duration: 0.2 } }}
       className="bg-white rounded-xl border border-gray-100 overflow-hidden flex flex-col group"
     >
       {/* ── Image block ── */}

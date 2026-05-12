@@ -4,64 +4,64 @@ export default {
   theme: {
     extend: {
       colors: {
-        // ── AgocCare brand palette — extracted from logo ──────────
-        // Logo colors: Navy #1A3A6B | Cyan #00AEEF | Green #39B54A | White #FFFFFF
+        // ── AgocCare brand colors ─────────────────────────────────
+        // #044b99 Navy Blue | #079DDF Cyan Blue | #94A614 Olive Green
         primary: {
-          DEFAULT: '#1A3A6B',   // Navy blue — logo ring & "PVT. LTD."
-          dark:    '#122B52',
-          light:   '#E8EFF9',
-          50:      '#E8EFF9',
-          100:     '#C3D2EC',
-          200:     '#96B0D9',
-          300:     '#638DC3',
-          400:     '#3868AE',
-          500:     '#1A3A6B',
-          600:     '#122B52',
-          700:     '#0C1E3A',
-          800:     '#071224',
-          900:     '#030810',
+          DEFAULT: '#044b99',
+          dark:    '#033874',
+          light:   '#E6EEF8',
+          50:      '#E6EEF8',
+          100:     '#BACED0',
+          200:     '#8AAEE0',
+          300:     '#5A8ED0',
+          400:     '#2A6EBF',
+          500:     '#044b99',
+          600:     '#033874',
+          700:     '#022650',
+          800:     '#01152D',
+          900:     '#00080F',
         },
         secondary: {
-          DEFAULT: '#00AEEF',   // Cyan blue — logo "AGOC" text & icon arc
-          dark:    '#0090C9',
-          light:   '#E0F6FD',
-          50:      '#E0F6FD',
-          400:     '#29BCEF',
-          500:     '#00AEEF',
-          600:     '#0090C9',
+          DEFAULT: '#079DDF',
+          dark:    '#0580B8',
+          light:   '#E0F5FC',
+          50:      '#E0F5FC',
+          100:     '#B3E5F7',
+          400:     '#2DB0E8',
+          500:     '#079DDF',
+          600:     '#0580B8',
         },
         cta: {
-          DEFAULT: '#39B54A',   // Green — logo "CARE" text & "empowering life"
-          dark:    '#2A8C37',
-          light:   '#E8F6EA',
+          DEFAULT: '#94A614',
+          dark:    '#728010',
+          light:   '#F2F5E0',
         },
         brand: {
-          navy:          '#1A3A6B',
-          cyan:          '#00AEEF',
-          green:         '#39B54A',
-          'green-dark':  '#2A8C37',
-          'green-light': '#E8F6EA',
-          gray:          '#4D4D4D',
+          navy:         '#044b99',
+          cyan:         '#079DDF',
+          olive:        '#94A614',
+          'olive-dark': '#728010',
+          'olive-light':'#F2F5E0',
         },
-        // teal = alias for body text/bg (navy-based for consistency)
+        // teal = alias used across components (mapped to primary navy)
         teal: {
-          DEFAULT: '#1A3A6B',
+          DEFAULT: '#044b99',
           light:   '#EEF4FB',
-          mid:     '#C3D2EC',
+          mid:     '#BACED0',
         },
       },
       fontFamily: { sans: ['Figtree', 'Noto Sans', 'system-ui', 'sans-serif'] },
       boxShadow: {
-        card:      '0 1px 4px rgba(0,0,0,.06)',
-        'card-lg': '0 8px 32px rgba(27,75,138,.14)',
-        btn:       '0 2px 8px rgba(27,75,138,.30)',
-        'btn-green': '0 2px 8px rgba(57,181,74,.30)',
+        card:        '0 1px 4px rgba(0,0,0,.06)',
+        'card-lg':   '0 8px 32px rgba(4,75,153,.14)',
+        btn:         '0 2px 8px rgba(4,75,153,.35)',
+        'btn-green': '0 2px 8px rgba(148,166,20,.35)',
       },
       animation: {
-        'fade-up':  'fadeUp .45s ease both',
-        'fade-in':  'fadeIn .35s ease both',
-        marquee:      'marquee 30s linear infinite',
-        'marquee-slow':'marquee 50s linear infinite',
+        'fade-up':      'fadeUp .45s ease both',
+        'fade-in':      'fadeIn .35s ease both',
+        marquee:        'marquee 30s linear infinite',
+        'marquee-slow': 'marquee 50s linear infinite',
       },
       keyframes: {
         fadeUp:  { from: { opacity: 0, transform: 'translateY(14px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
