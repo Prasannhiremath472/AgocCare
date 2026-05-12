@@ -4,7 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
 
-const BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+const BASE = import.meta.env.PROD ? '' : 'http://localhost:5000';
 
 const CATEGORIES_META = {
   tablets:    { image: `${BASE}/uploads/1T%20FOL%20MD%20Tab/1.jpg`,      bg: 'bg-blue-50'   },

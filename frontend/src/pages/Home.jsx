@@ -60,7 +60,7 @@ const HERO_SLIDES = [
     sub:'Genuine medicines & healthcare products at your doorstep. Call us: +91 99232 68310.',
     cta:'Shop Now', ctaTo:'/medicines',
     cta2:'Upload Prescription', cta2To:'/prescription',
-    image:`${import.meta.env.VITE_API_URL?.replace('/api','')||'http://localhost:5000'}/uploads/slider%20images/sliderimage1.jpeg`,
+    image:`${import.meta.env.PROD?'':'http://localhost:5000'}/uploads/slider%20images/sliderimage1.jpeg`,
     overlay:'from-primary/80 via-primary/50 to-primary/20',
   },
   {
@@ -69,7 +69,7 @@ const HERO_SLIDES = [
     sub:'Power your immunity with certified vitamins, minerals and nutritional supplements.',
     cta:'Explore Vitamins', ctaTo:'/medicines?category=vitamins',
     cta2:'View All', cta2To:'/medicines',
-    image:`${import.meta.env.VITE_API_URL?.replace('/api','')||'http://localhost:5000'}/uploads/slider%20images/sliderimage2.jpeg`,
+    image:`${import.meta.env.PROD?'':'http://localhost:5000'}/uploads/slider%20images/sliderimage2.jpeg`,
     overlay:'from-primary/80 via-primary/50 to-primary/20',
   },
   {
@@ -78,7 +78,7 @@ const HERO_SLIDES = [
     sub:'Sourced directly from licensed manufacturers. Wholesale & retail across India.',
     cta:'Browse Products', ctaTo:'/medicines',
     cta2:'About Us', cta2To:'/about',
-    image:`${import.meta.env.VITE_API_URL?.replace('/api','')||'http://localhost:5000'}/uploads/slider%20images/sliderimage3.jpeg`,
+    image:`${import.meta.env.PROD?'':'http://localhost:5000'}/uploads/slider%20images/sliderimage3.jpeg`,
     overlay:'from-primary/80 via-primary/50 to-primary/20',
   },
   {
@@ -87,7 +87,7 @@ const HERO_SLIDES = [
     sub:'Agoc Care Pvt. Ltd. — Your trusted pharma partner since 2016.',
     cta:'Contact Us', ctaTo:'/about#contact',
     cta2:'Our Products', cta2To:'/medicines',
-    image:`${import.meta.env.VITE_API_URL?.replace('/api','')||'http://localhost:5000'}/uploads/slider%20images/sliderimage4.jpeg`,
+    image:`${import.meta.env.PROD?'':'http://localhost:5000'}/uploads/slider%20images/sliderimage4.jpeg`,
     overlay:'from-primary/80 via-primary/50 to-primary/20',
   },
 ];

@@ -222,7 +222,7 @@ export default function About() {
                   className="bg-white rounded-2xl p-8 border border-teal-mid/30 shadow-card text-center">
                   <div className="w-44 h-44 rounded-full overflow-hidden mx-auto mb-5 border-4 border-primary/20 shadow-lg">
                     <img
-                      src={`${import.meta.env.VITE_API_URL?.replace('/api','')||'http://localhost:5000'}/uploads/Directors/${d.img}`}
+                      src={`${import.meta.env.PROD?'':'http://localhost:5000'}/uploads/Directors/${d.img}`}
                       alt={d.name}
                       className="w-full h-full object-cover object-top"
                       onError={e => { e.target.style.display='none'; e.target.parentNode.classList.add('flex','items-center','justify-center',d.color); e.target.parentNode.innerHTML = `<span class="text-white text-3xl font-extrabold">${d.initials}</span>`; }}
