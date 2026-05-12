@@ -122,8 +122,8 @@ The "Last Updated" date at the top of this policy will always indicate when it w
     title: '12. Grievance Officer',
     content: `In accordance with the Information Technology Act, 2000 and the IT (Intermediary Guidelines) Rules, 2011, we have appointed a Grievance Officer:
 
-Name: Satyajeet Kadavekar
-Designation: CEO & Founder
+Name: Dadaso Vasant Kadavekar
+Designation: Director
 Company: Agoc Care Private Limited
 Address: Palladium Building, Near Pristine Womens Hospital, Assembly Road, Shahupuri, Kolhapur, Maharashtra
 Email: agoccarepvtltd@gmail.com
@@ -184,10 +184,9 @@ export default function PrivacyPolicy() {
           </motion.div>
 
           {/* Sections */}
-          <motion.div className="space-y-6"
-            variants={staggerContainer(0.06)} initial="hidden" whileInView="visible" viewport={viewport}>
+          <div className="space-y-6">
             {SECTIONS.map((s, i) => (
-              <motion.div key={i} variants={staggerItem}
+              <div key={i}
                 className="bg-white rounded-2xl border border-teal-mid/30 shadow-card overflow-hidden">
                 <div className="bg-primary/5 border-b border-teal-mid/20 px-6 py-4">
                   <h2 className="text-base font-extrabold text-primary">{s.title}</h2>
@@ -195,9 +194,9 @@ export default function PrivacyPolicy() {
                 <div className="px-6 py-5">
                   <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{s.content}</p>
                 </div>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
 
           {/* Footer note */}
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={viewport}
