@@ -31,6 +31,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const AiChat       = lazy(() => import('./pages/AiChat'));
 const Prescription = lazy(() => import('./pages/Prescription'));
 const About        = lazy(() => import('./pages/About'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 
 const Spinner = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -68,6 +69,7 @@ export default function App() {
           <Route path="ai-chat" element={<AiChat />} />
           <Route path="prescription" element={<PrivateRoute><Prescription /></PrivateRoute>} />
           <Route path="about" element={<About />} />
+          <Route path="privacy-policy" element={<PrivacyPolicy />} />
         </Route>
         <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
           <Route index element={<AdminDashboard />} />

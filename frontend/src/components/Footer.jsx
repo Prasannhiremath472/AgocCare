@@ -5,7 +5,7 @@ import { staggerContainer, staggerItem, fadeUp, viewport } from '../utils/motion
 const LINKS = {
   Shop:    [['All Medicines','/medicines'],['Tablets','/medicines?category=tablets'],['Vitamins','/medicines?category=vitamins'],['Skincare','/medicines?category=skincare'],['Devices','/medicines?category=medical-devices']],
   Account: [['Login','/login'],['Register','/register'],['My Orders','/orders'],['Cart','/cart']],
-  Company: [['About Us','/about'],['Privacy Policy','#'],['Terms of Service','#'],['Refund Policy','#']],
+  Company: [['About Us','/about'],['Privacy Policy','/privacy-policy'],['Terms of Service','#'],['Refund Policy','#']],
 };
 
 export default function Footer() {
