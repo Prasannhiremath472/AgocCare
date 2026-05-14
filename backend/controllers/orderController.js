@@ -1,10 +1,11 @@
 const db = require('../models/db');
 
 exports.createOrder = async (req, res) => {
-  const { items, shipping_address } = req.body;
+  const { items, shipping_address, delivery_fee } = req.body;
   if (!items?.length || !shipping_address) {
     return res.status(400).json({ message: 'Items and shipping address required' });
   }
+  const deliveryFee = parseFloat(delivery_fee) || 0;
 
   const conn = await db.getConnection();
   try {
@@ -30,9 +31,10 @@ exports.createOrder = async (req, res) => {
       }
     } catch {}
 
+    const grandTotal = total + deliveryFee;
     const [orderResult] = await conn.query(
       'INSERT INTO orders (user_id, total, status, shipping_address) VALUES (?, ?, "pending", ?)',
-      [req.user.id, total.toFixed(2), shipping_address]
+      [req.user.id, grandTotal.toFixed(2), shipping_address]
     );
     const orderId = orderResult.insertId;
 
@@ -46,7 +48,7 @@ exports.createOrder = async (req, res) => {
     }
 
     await conn.commit();
-    res.status(201).json({ order_id: orderId, total });
+    res.status(201).json({ order_id: orderId, total: grandTotal });
   } catch (err) {
     await conn.rollback();
     res.status(err.status || 500).json({ message: err.message || 'Order creation failed' });

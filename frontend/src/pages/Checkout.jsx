@@ -35,9 +35,11 @@ export default function Checkout() {
     setLoading(true);
     try {
       // Step 1: Create order in DB
+      const fee = getTotal() >= 499 ? 0 : 49;
       const { data: order } = await createOrder({
         items: items.map(i => ({ product_id: i.product_id, qty: i.qty })),
         shipping_address: JSON.stringify(address),
+        delivery_fee: fee,
       });
 
       // Step 2: Create Razorpay order
