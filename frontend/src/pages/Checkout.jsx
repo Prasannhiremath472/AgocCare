@@ -50,7 +50,7 @@ export default function Checkout() {
         currency:    rzp.currency,
         name:        'Agoc Care',
         description: 'Medicine Order',
-        image:       'https://i.imgur.com/n5tjHFD.png',
+        image:       `${import.meta.env.PROD ? '' : 'http://localhost:5000'}/Agoccarelogo.jpeg`,
         order_id:    rzp.order_id,
         prefill: {
           name:    address.name,
@@ -75,7 +75,7 @@ export default function Checkout() {
             preferences: { show_default_blocks: true },
           },
         },
-        theme: { color: '#0891B2', hide_topbar: false },
+        theme: { color: '#044b99', hide_topbar: false },
         handler: async response => {
           // Step 4: Verify signature on backend — NEVER trust frontend
           try {
