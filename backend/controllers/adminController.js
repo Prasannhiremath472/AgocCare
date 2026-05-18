@@ -41,17 +41,16 @@ exports.updateProduct = async (req, res) => {
 
     // Build changed fields for audit
     const changes = {};
-    if (name  && name  !== old?.name)  { changes.name  = { from: old?.name,  to: name  }; }
-    if (price && price !== String(old?.price)) { changes.price = { from: old?.price, to: price }; }
-    if (stock && stock !== String(old?.stock)) { changes.stock = { from: old?.stock, to: stock }; }
-    if (is_active !== undefined && String(is_active) !== String(old?.is_active)) {
-      changes.is_active = { from: old?.is_active, to: is_active };
-    }
+    if (name     !== undefined && name     !== old?.name)                          { changes.name     = { from: old?.name,     to: name     }; }
+    if (price    !== undefined && parseFloat(price)    !== parseFloat(old?.price)) { changes.price    = { from: `₹${old?.price}`, to: `₹${price}` }; }
+    if (stock    !== undefined && parseInt(stock)      !== parseInt(old?.stock))   { changes.stock    = { from: `${old?.stock} units`, to: `${stock} units` }; }
+    if (is_active!== undefined && String(is_active)   !== String(old?.is_active)) { changes.status   = { from: old?.is_active ? 'Active' : 'Inactive', to: parseInt(is_active) ? 'Active' : 'Inactive' }; }
 
     const changedKeys = Object.keys(changes);
+    const productName = name || old?.name || `#${req.params.id}`;
     const desc = changedKeys.length
-      ? `Updated product #${req.params.id} (${old?.name}): ${changedKeys.map(k => `${k}: ${changes[k].from}→${changes[k].to}`).join(', ')}`
-      : `Updated product #${req.params.id} (${old?.name || name})`;
+      ? `Updated "${productName}": ${changedKeys.map(k => `${k} ${changes[k].from}→${changes[k].to}`).join(', ')}`
+      : `Updated "${productName}" (no tracked field changes)`;
 
     await auditLog(req, 'UPDATE', 'product', req.params.id, desc, old, { name, price, stock, is_active, composition });
     res.json({ message: 'Product updated' });
