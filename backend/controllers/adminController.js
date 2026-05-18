@@ -118,6 +118,37 @@ exports.createCategory = async (req, res) => {
   }
 };
 
+// Audit Logs
+exports.getAuditLogs = async (req, res) => {
+  const { action, entity, admin_id, from, to, search, page: pg } = req.query;
+  const page   = Math.max(1, parseInt(pg) || 1);
+  const limit  = 20;
+  const offset = (page - 1) * limit;
+  const where  = ['1=1'];
+  const params = [];
+
+  if (action)   { where.push('a.action = ?');        params.push(action); }
+  if (entity)   { where.push('a.entity = ?');        params.push(entity); }
+  if (admin_id) { where.push('a.admin_id = ?');      params.push(admin_id); }
+  if (from)     { where.push('a.created_at >= ?');   params.push(from + ' 00:00:00'); }
+  if (to)       { where.push('a.created_at <= ?');   params.push(to + ' 23:59:59'); }
+  if (search)   { where.push('a.description LIKE ?');params.push(`%${search}%`); }
+
+  const whereStr = 'WHERE ' + where.join(' AND ');
+  try {
+    const [[{ total }]] = await db.query(`SELECT COUNT(*) as total FROM audit_logs a ${whereStr}`, params);
+    const [logs]        = await db.query(
+      `SELECT a.*, u.name as admin_name FROM audit_logs a
+       LEFT JOIN users u ON a.admin_id = u.id
+       ${whereStr} ORDER BY a.created_at DESC LIMIT ? OFFSET ?`,
+      [...params, limit, offset]
+    );
+    res.json({ logs, total, page, pages: Math.max(1, Math.ceil(total / limit)) });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch audit logs' });
+  }
+};
+
 exports.getDashboard = async (req, res) => {
   try {
     const [[revenueRow]] = await db.query(`SELECT COALESCE(SUM(total),0) as total FROM orders WHERE status = 'paid'`);
