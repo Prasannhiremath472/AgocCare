@@ -1,6 +1,7 @@
 const Razorpay = require('razorpay');
-const crypto = require('crypto');
-const db = require('../models/db');
+const crypto  = require('crypto');
+const db      = require('../models/db');
+const { sendOrderNotification } = require('../utils/mailer');
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -72,6 +73,26 @@ exports.verifyPayment = async (req, res) => {
     );
 
     await conn.commit();
+
+    // Fetch full order + user + items for email
+    try {
+      const [[orderDetail]] = await db.query(
+        `SELECT o.*, u.name as customer_name, u.email as customer_email, u.phone as customer_phone
+         FROM orders o JOIN users u ON o.user_id = u.id
+         WHERE o.id = ?`, [updatedOrder.id]
+      );
+      const [orderItems] = await db.query(
+        `SELECT oi.qty, oi.price, p.name FROM order_items oi JOIN products p ON oi.product_id = p.id
+         WHERE oi.order_id = ?`, [updatedOrder.id]
+      );
+      const [admins] = await db.query('SELECT email FROM users WHERE role = "admin"');
+      const adminEmails = admins.map(a => a.email);
+
+      await sendOrderNotification(adminEmails, orderDetail, orderItems, razorpay_payment_id);
+    } catch (mailErr) {
+      console.error('[Order notification email failed]', mailErr.message);
+    }
+
     res.json({ message: 'Payment verified', order_id: updatedOrder.id });
   } catch {
     await conn.rollback();
