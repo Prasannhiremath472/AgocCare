@@ -52,6 +52,10 @@ export const adminUpdateOrder = (id, data) => api.put(`/admin/orders/${id}/statu
 export const adminGetUsers = () => api.get('/admin/users');
 export const adminDashboard = () => api.get('/admin/dashboard');
 export const adminCreateCategory = (data) => api.post('/admin/categories', data);
+export const adminBulkUpload = (data) => api.post('/admin/bulk-upload', data, {
+  headers: { 'Content-Type': 'multipart/form-data' },
+  timeout: 120000,
+});
 
 export const getAnalytics = () => api.get('/analytics');
 
