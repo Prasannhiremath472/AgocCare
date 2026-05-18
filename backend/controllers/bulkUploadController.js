@@ -1,9 +1,8 @@
-const XLSX     = require('xlsx');
-const AdmZip   = require('adm-zip');
-const path     = require('path');
-const fs       = require('fs');
-const db       = require('../models/db');
-const auditLog = require('../utils/audit');
+const XLSX   = require('xlsx');
+const AdmZip = require('adm-zip');
+const path   = require('path');
+const fs     = require('fs');
+const db     = require('../models/db');
 
 const UPLOAD_DIR = path.join(__dirname, '../uploads');
 
@@ -142,11 +141,6 @@ exports.bulkUpload = async (req, res) => {
       results.failed.push({ name, reason: err.message });
     }
   }
-
-  await auditLog(req, 'BULK_UPLOAD', 'product', null,
-    `Bulk upload: ${results.success.length} succeeded, ${results.failed.length} failed out of ${results.total} rows`,
-    null, { success: results.success.length, failed: results.failed.length, total: results.total }
-  );
 
   res.json({
     message: `Bulk upload complete: ${results.success.length} succeeded, ${results.failed.length} failed`,

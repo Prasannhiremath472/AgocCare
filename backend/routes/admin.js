@@ -32,6 +32,4 @@ router.post('/categories', ctrl.createCategory);
 
 router.post('/bulk-upload', bulkUploadMiddleware, bulk.bulkUpload);
 
-router.get('/audit-logs', ctrl.getAuditLogs);
-
 module.exports = router;
