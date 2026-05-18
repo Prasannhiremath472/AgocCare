@@ -29,8 +29,14 @@ exports.updateProduct = async (req, res) => {
   const fields = { name, slug, description, price, mrp, stock, category_id, composition, manufacturer, expiry_date, prescription_required, is_active };
   if (req.file) fields.image = `/uploads/${req.file.filename}`;
 
-  const sets   = Object.keys(fields).filter(k => fields[k] !== undefined).map(k => `${k} = ?`).join(', ');
-  const values = Object.keys(fields).filter(k => fields[k] !== undefined).map(k => fields[k]);
+  // Nullable fields — convert empty string to null
+  const nullable = ['mrp', 'expiry_date', 'composition', 'manufacturer', 'description'];
+  nullable.forEach(k => { if (fields[k] === '') fields[k] = null; });
+
+  const validKeys = Object.keys(fields).filter(k => fields[k] !== undefined);
+  if (!validKeys.length) return res.status(400).json({ message: 'No fields to update' });
+  const sets   = validKeys.map(k => `${k} = ?`).join(', ');
+  const values = validKeys.map(k => fields[k]);
 
   try {
     // Fetch old values before update
