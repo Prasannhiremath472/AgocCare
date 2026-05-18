@@ -1,7 +1,18 @@
 const router = require('express').Router();
-const ctrl = require('../controllers/adminController');
+const ctrl   = require('../controllers/adminController');
+const bulk   = require('../controllers/bulkUploadController');
 const { auth, adminOnly } = require('../middleware/auth');
-const upload = require('../middleware/upload');
+const upload  = require('../middleware/upload');
+const multer  = require('multer');
+
+// In-memory storage for bulk upload (excel + zip)
+const bulkUploadMiddleware = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
+}).fields([
+  { name: 'excel', maxCount: 1 },
+  { name: 'images', maxCount: 1 },
+]);
 
 router.use(auth, adminOnly);
 
@@ -18,5 +29,7 @@ router.put('/orders/:id/status', ctrl.updateOrderStatus);
 router.get('/users', ctrl.getAllUsers);
 
 router.post('/categories', ctrl.createCategory);
+
+router.post('/bulk-upload', bulkUploadMiddleware, bulk.bulkUpload);
 
 module.exports = router;
