@@ -33,14 +33,30 @@ exports.updateProduct = async (req, res) => {
   const values = Object.keys(fields).filter(k => fields[k] !== undefined).map(k => fields[k]);
 
   try {
-    const [[old]] = await db.query('SELECT name, price, stock, is_active FROM products WHERE id = ?', [req.params.id]);
+    // Fetch old values before update
+    const [oldRows] = await db.query('SELECT name, price, stock, is_active, composition FROM products WHERE id = ?', [req.params.id]);
+    const old = oldRows[0] || null;
+
     await db.query(`UPDATE products SET ${sets} WHERE id = ?`, [...values, req.params.id]);
-    await auditLog(req, 'UPDATE', 'product', req.params.id,
-      `Updated product: ${name || old?.name}`,
-      old, { name, price, stock, is_active }
-    );
+
+    // Build changed fields for audit
+    const changes = {};
+    if (name  && name  !== old?.name)  { changes.name  = { from: old?.name,  to: name  }; }
+    if (price && price !== String(old?.price)) { changes.price = { from: old?.price, to: price }; }
+    if (stock && stock !== String(old?.stock)) { changes.stock = { from: old?.stock, to: stock }; }
+    if (is_active !== undefined && String(is_active) !== String(old?.is_active)) {
+      changes.is_active = { from: old?.is_active, to: is_active };
+    }
+
+    const changedKeys = Object.keys(changes);
+    const desc = changedKeys.length
+      ? `Updated product #${req.params.id} (${old?.name}): ${changedKeys.map(k => `${k}: ${changes[k].from}→${changes[k].to}`).join(', ')}`
+      : `Updated product #${req.params.id} (${old?.name || name})`;
+
+    await auditLog(req, 'UPDATE', 'product', req.params.id, desc, old, { name, price, stock, is_active, composition });
     res.json({ message: 'Product updated' });
   } catch (err) {
+    console.error('[updateProduct]', err.message);
     res.status(500).json({ message: 'Failed to update product' });
   }
 };
