@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { adminGetUsers } from '../../services/api';
+import * as XLSX from 'xlsx';
 
 export default function AdminUsers() {
   const [users, setUsers]     = useState([]);
@@ -19,6 +20,22 @@ export default function AdminUsers() {
   const admins    = users.filter(u => u.role === 'admin').length;
   const customers = users.filter(u => u.role === 'user').length;
 
+  const exportExcel = () => {
+    const data = filtered.map(u => ({
+      'Name':        u.name,
+      'Email':       u.email,
+      'Mobile':      u.phone || '—',
+      'Role':        u.role,
+      'Verified':    u.is_verified ? 'Yes' : 'No',
+      'Joined Date': new Date(u.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }),
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws['!cols'] = [{ wch:25 },{ wch:30 },{ wch:15 },{ wch:10 },{ wch:10 },{ wch:15 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Customers');
+    XLSX.writeFile(wb, `AgocCare_Customers_${new Date().toISOString().slice(0,10)}.xlsx`);
+  };
+
   return (
     <div className="p-6 space-y-5">
       {/* Header */}
@@ -28,13 +45,23 @@ export default function AdminUsers() {
           <h1 className="text-xl font-black text-teal">Customers</h1>
           <p className="text-xs text-gray-400 mt-0.5">{users.length} registered users</p>
         </div>
-        <div className="relative">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
-          </svg>
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search users…"
-            className="border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-sm text-teal bg-white focus:outline-none focus:ring-2 focus:ring-primary shadow-sm w-52"/>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+            </svg>
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Search users…"
+              className="border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-sm text-teal bg-white focus:outline-none focus:ring-2 focus:ring-primary shadow-sm w-52"/>
+          </div>
+          <motion.button onClick={exportExcel} disabled={!filtered.length}
+            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+            className="flex items-center gap-2 bg-cta text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-cta-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            Export Excel
+          </motion.button>
         </div>
       </motion.div>
 
