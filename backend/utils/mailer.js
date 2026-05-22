@@ -94,6 +94,65 @@ exports.sendOrderNotification = async (adminEmails, order, items, paymentId) => 
   });
 };
 
+exports.sendConsultationNotification = async (adminEmails, c) => {
+  await transporter.sendMail({
+    from:    process.env.MAIL_FROM || 'AgocCare <agoccarepvtltd@gmail.com>',
+    to:      adminEmails.join(', '),
+    subject: `🩺 New ${c.type} Consultation Request — ${c.name}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f8faff;padding:32px;border-radius:12px;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <h2 style="color:#044b99;margin:0;">Agoc Care Pvt. Ltd.</h2>
+          <p style="color:#079DDF;font-size:12px;margin:4px 0 0;">Empowering Life</p>
+        </div>
+
+        <div style="background:#044b99;color:white;padding:16px 24px;border-radius:10px;text-align:center;margin-bottom:24px;">
+          <h2 style="margin:0;font-size:20px;">🩺 New ${c.type} Consultation Request</h2>
+          <p style="margin:6px 0 0;opacity:0.85;font-size:13px;">A patient has requested an appointment</p>
+        </div>
+
+        <div style="background:white;border-radius:10px;padding:20px;margin-bottom:16px;border:1px solid #e5e7eb;">
+          <h3 style="color:#044b99;margin:0 0 12px;">Patient Details</h3>
+          <table style="width:100%;border-collapse:collapse;">
+            <tr><td style="color:#888;padding:5px 0;width:40%;">Name</td><td style="color:#333;font-weight:bold;">${c.name}</td></tr>
+            <tr><td style="color:#888;padding:5px 0;">Mobile</td><td style="color:#333;">${c.phone}</td></tr>
+            <tr><td style="color:#888;padding:5px 0;">Email</td><td style="color:#333;">${c.email || '—'}</td></tr>
+            <tr><td style="color:#888;padding:5px 0;">Age</td><td style="color:#333;">${c.age} years</td></tr>
+          </table>
+        </div>
+
+        <div style="background:white;border-radius:10px;padding:20px;margin-bottom:16px;border:1px solid #e5e7eb;">
+          <h3 style="color:#044b99;margin:0 0 12px;">Appointment Details</h3>
+          <table style="width:100%;border-collapse:collapse;">
+            <tr><td style="color:#888;padding:5px 0;width:40%;">Consultation Type</td><td style="color:#333;font-weight:bold;">${c.consultation_type}</td></tr>
+            <tr><td style="color:#888;padding:5px 0;">Preferred Date</td><td style="color:#333;">${new Date(c.date).toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' })}</td></tr>
+            <tr><td style="color:#888;padding:5px 0;">Time Slot</td><td style="color:#333;">${c.time_slot}</td></tr>
+          </table>
+        </div>
+
+        ${c.message ? `
+        <div style="background:white;border-radius:10px;padding:20px;margin-bottom:16px;border:1px solid #e5e7eb;">
+          <h3 style="color:#044b99;margin:0 0 8px;">Symptoms / Message</h3>
+          <p style="color:#555;font-size:14px;margin:0;line-height:1.6;">${c.message}</p>
+        </div>` : ''}
+
+        <div style="background:#f0f6ff;border-radius:10px;padding:16px 20px;text-align:center;border:1px solid #bdd6f5;">
+          <p style="margin:0;color:#044b99;font-weight:bold;font-size:14px;">
+            Please call the patient to confirm the appointment.
+          </p>
+          <p style="margin:6px 0 0;color:#555;font-size:13px;">
+            📞 <a href="tel:${c.phone}" style="color:#044b99;">${c.phone}</a>
+          </p>
+        </div>
+
+        <p style="color:#aaa;font-size:11px;text-align:center;margin-top:20px;">
+          © ${new Date().getFullYear()} Agoc Care Pvt. Ltd. · Kolhapur, Maharashtra
+        </p>
+      </div>
+    `,
+  });
+};
+
 exports.sendOTP = async (email, otp, name = '') => {
   await transporter.sendMail({
     from:    process.env.MAIL_FROM || 'AgocCare <agoccarepvtltd@gmail.com>',

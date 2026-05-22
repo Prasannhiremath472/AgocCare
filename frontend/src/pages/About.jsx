@@ -3,6 +3,9 @@ import { Helmet } from 'react-helmet-async';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, staggerItem, fadeUp, fadeLeft, fadeRight, viewport } from '../utils/motion';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay } from 'swiper/modules';
+import 'swiper/css';
 
 const GALLERY = [
   // Team / People
@@ -216,7 +219,7 @@ export default function About() {
               {/* Director 1 — Dadaso Vasant Kadavekar */}
               {[
                 { img: 'director1.png', name: 'Dadaso Vasant Kadavekar', initials: 'DK', color: 'bg-primary' },
-                { img: 'director2.png', name: 'Ashok Sakharam Surve',    initials: 'AS', color: 'bg-secondary' },
+                { img: 'director2.jpeg', name: 'Ashok Sakharam Surve',    initials: 'AS', color: 'bg-secondary' },
               ].map(d => (
                 <motion.div key={d.name} variants={staggerItem}
                   className="bg-white rounded-2xl p-8 border border-teal-mid/30 shadow-card text-center">
@@ -241,47 +244,51 @@ export default function About() {
         </section>
 
         {/* ── Gallery ── */}
-        <section id="gallery" className="section bg-white scroll-mt-20">
-          <div className="container mx-auto max-w-6xl">
+        <section id="gallery" className="py-16 scroll-mt-20 bg-white">
+          <div className="container mx-auto max-w-6xl px-4">
             <motion.div className="text-center mb-10"
               variants={fadeUp} initial="hidden" whileInView="visible" viewport={viewport}>
               <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-2">Activities</p>
               <h2 className="text-3xl font-extrabold text-teal mb-3">Gallery</h2>
               <p className="text-gray-500 max-w-xl mx-auto text-sm">A glimpse into our operations, team activities and healthcare initiatives.</p>
             </motion.div>
-
-            <motion.div
-              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-              variants={staggerContainer(0.06)} initial="hidden" whileInView="visible" viewport={viewport}>
-              {GALLERY.map((img, i) => (
-                <motion.div key={i} variants={staggerItem}
-                  whileHover={{ scale: 1.02 }}
-                  onClick={() => setLightbox(i)}
-                  className="relative rounded-2xl overflow-hidden aspect-square cursor-pointer group shadow-card">
-                  <img src={img.src} alt={img.caption}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    loading="lazy"/>
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/50 transition-all duration-300 flex items-end">
-                    <div className="w-full px-4 py-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                      <p className="text-white text-sm font-semibold">{img.caption}</p>
-                    </div>
-                  </div>
-                  {/* Zoom icon */}
-                  <div className="absolute top-3 right-3 w-8 h-8 bg-white/0 group-hover:bg-white/90 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100">
-                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
-                    </svg>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-
-            <motion.p variants={fadeUp} initial="hidden" whileInView="visible" viewport={viewport}
-              className="text-center text-xs text-gray-400 mt-6">
-              * Placeholder images shown. Real activity photos will be updated soon.
-            </motion.p>
           </div>
+
+          {/* Full width slider — no container constraint */}
+          <div className="w-full overflow-hidden">
+              <Swiper
+                modules={[Autoplay]}
+                slidesPerView="auto"
+                spaceBetween={16}
+                loop={true}
+                speed={3000}
+                autoplay={{ delay: 0, disableOnInteraction: false, pauseOnMouseEnter: true }}
+                allowTouchMove={true}
+                className="!overflow-visible"
+              >
+                {[...GALLERY, ...GALLERY].map((img, i) => (
+                  <SwiperSlide key={i} style={{ width: '340px' }}>
+                    <div onClick={() => setLightbox(i % GALLERY.length)}
+                      className="relative rounded-2xl overflow-hidden cursor-pointer group shadow-card"
+                      style={{ height: '260px' }}>
+                      <img src={img.src} alt={img.caption}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"/>
+                      <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/60 transition-all duration-300 flex items-end">
+                        <div className="w-full px-3 py-2.5 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                          <p className="text-white text-xs font-semibold">{img.caption}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+
+          <motion.p variants={fadeUp} initial="hidden" whileInView="visible" viewport={viewport}
+            className="text-center text-xs text-gray-400 mt-6 px-4">
+            * Placeholder images shown. Real activity photos will be updated soon.
+          </motion.p>
         </section>
 
         {/* Lightbox */}

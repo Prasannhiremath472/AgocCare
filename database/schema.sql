@@ -78,6 +78,21 @@ CREATE TABLE payments (
 INSERT INTO users (name, email, password, role) VALUES
 ('Admin', 'admin@medico.com', '$2b$10$LLxLVQ1jj.ZjvUWmtZQ21O.na5oFM5Rvxl9ziEpLGMXt9snStQCc2', 'admin');
 
+CREATE TABLE IF NOT EXISTS consultations (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  type VARCHAR(50) NOT NULL DEFAULT 'gynecologist',
+  patient_name VARCHAR(120) NOT NULL,
+  phone VARCHAR(15) NOT NULL,
+  email VARCHAR(150),
+  age TINYINT UNSIGNED,
+  consultation_type VARCHAR(120),
+  preferred_date DATE,
+  time_slot VARCHAR(60),
+  message TEXT,
+  status ENUM('pending','confirmed','completed','cancelled') NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
 -- Seed: categories
 INSERT INTO categories (name, slug) VALUES
 ('Tablets', 'tablets'),

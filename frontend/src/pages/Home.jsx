@@ -7,6 +7,7 @@ import {
 import { getFeatured, getCategories, getOffers } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import CategorySlider from '../components/CategorySlider';
+import GynecologistConsultation from '../components/GynecologistConsultation';
 import {
   fadeUp, fadeIn, fadeLeft, fadeRight, scaleIn,
   staggerContainer, staggerItem, viewport, popIn
@@ -97,6 +98,96 @@ const Stars = ({ n }) => Array.from({ length: 5 }, (_, i) => (
     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
   </svg>
 ));
+
+// ── Board Members Accordion ────────────────────────────────────────────────
+function BoardAccordion() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ backgroundColor: '#035AA6' }}>
+      <button onClick={() => setOpen(v => !v)}
+        className="flex items-center justify-between w-full px-5 py-3.5 font-semibold text-white text-sm">
+        <span>Board Members</span>
+        <svg className={`w-5 h-5 transition-transform duration-200 ${open ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ height:0, opacity:0 }} animate={{ height:'auto', opacity:1 }}
+            exit={{ height:0, opacity:0 }} transition={{ duration:0.25 }}
+            className="overflow-hidden bg-white/10 px-5 pb-4">
+            <div className="grid grid-cols-2 gap-3 pt-3">
+              {[
+                { name:'Dadaso Vasant Kadavekar', role:'Director', img:'director1.png', initials:'DK' },
+                { name:'Ashok Sakharam Surve',   role:'Director', img:'director2.jpeg', initials:'AS' },
+              ].map(m => (
+                <div key={m.name} className="flex flex-col items-center gap-2 bg-white/10 rounded-xl px-3 py-3 text-center">
+                  <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white/30 shrink-0">
+                    <img
+                      src={`${import.meta.env.PROD ? '' : 'http://localhost:5000'}/uploads/Directors/${m.img}`}
+                      alt={m.name}
+                      className="w-full h-full object-cover object-top"
+                      onError={e => {
+                        e.target.style.display = 'none';
+                        e.target.parentNode.innerHTML = `<div class="w-full h-full bg-white/20 flex items-center justify-center text-white font-black text-lg">${m.initials}</div>`;
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-white text-xs font-bold leading-tight">{m.name}</p>
+                    <p className="text-white/70 text-[10px] mt-0.5">{m.role}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ── Contact Us Accordion ────────────────────────────────────────────────────
+function ContactAccordion() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ backgroundColor: '#035AA6' }}>
+      <button onClick={() => setOpen(v => !v)}
+        className="flex items-center justify-between w-full px-5 py-3.5 font-semibold text-white text-sm">
+        <span>Contact Us</span>
+        <svg className={`w-5 h-5 transition-transform duration-200 ${open ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ height:0, opacity:0 }} animate={{ height:'auto', opacity:1 }}
+            exit={{ height:0, opacity:0 }} transition={{ duration:0.25 }}
+            className="overflow-hidden bg-white/10 px-5 pb-4">
+            <div className="flex flex-col gap-2 pt-3 text-xs text-white/90">
+              {[
+                { icon:'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z', text:'+91 99232 68310', href:'tel:+919923268310' },
+                { icon:'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', text:'agoccarepvtltd@gmail.com', href:'mailto:agoccarepvtltd@gmail.com' },
+                { icon:'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', text:'Mon–Sat: 9:00 AM – 7:00 PM', href:null },
+                { icon:'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z', text:'Palladium Building, Shahupuri, Kolhapur', href:null },
+              ].map(c => (
+                <div key={c.text} className="flex items-start gap-2.5">
+                  <svg className="w-3.5 h-3.5 text-white/70 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={c.icon}/>
+                  </svg>
+                  {c.href
+                    ? <a href={c.href} className="text-white hover:underline">{c.text}</a>
+                    : <span>{c.text}</span>
+                  }
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export default function Home() {
   const [featured, setFeatured]     = useState([]);
@@ -285,21 +376,22 @@ export default function Home() {
              
              
 
-              {/* Arrow buttons linking to About sections */}
+              {/* About section buttons + accordions */}
               <motion.div variants={staggerContainer(0.08)} className="flex flex-col gap-3">
+
+                {/* Board Members — accordion */}
+                <BoardAccordion />
+
+                {/* Our Products — link */}
                 {[
-                  { label: 'Board Members',       hash: '#board',        color: '#035AA6' },
-                  { label: 'Our Products',        hash: '#our-products', color: '#079DDF' },
-                  { label: 'Our Wholesale Shop',  hash: '#wholesale',    color: '#035AA6' },
-                  { label: 'Our Retail Shops',    hash: '#retail',       color: '#079DDF' },
-                  { label: 'Contact Us',          hash: '#contact',      color: '#035AA6' },
-                ].map((btn, i) => (
+                  { label: 'Our Products',       hash: '#our-products', color: '#079DDF' },
+                  { label: 'Our Wholesale Shop', hash: '#wholesale',    color: '#035AA6' },
+                  { label: 'Our Retail Shops',   hash: '#retail',       color: '#079DDF' },
+                ].map(btn => (
                   <motion.div key={btn.label} variants={staggerItem}>
-                    <Link
-                      to={`/about${btn.hash}`}
+                    <Link to={`/about${btn.hash}`}
                       className="flex items-center justify-between w-full px-5 py-3.5 rounded-xl font-semibold text-white text-sm transition-all duration-150 hover:opacity-90 hover:translate-x-1 group"
-                      style={{ backgroundColor: btn.color }}
-                    >
+                      style={{ backgroundColor: btn.color }}>
                       <span>{btn.label}</span>
                       <svg className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7"/>
@@ -307,11 +399,20 @@ export default function Home() {
                     </Link>
                   </motion.div>
                 ))}
+
+                {/* Contact Us — accordion */}
+                <ContactAccordion />
+
               </motion.div>
             </motion.div>
           </motion.div>
         </div>
       </section>
+
+      {/* ══════════════════════════════════════
+          GYNECOLOGIST CONSULTATION FORM
+      ══════════════════════════════════════ */}
+      <GynecologistConsultation />
 
       {/* ══════════════════════════════════════
           CATEGORIES
