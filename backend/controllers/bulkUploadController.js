@@ -1,14 +1,8 @@
 const XLSX     = require('xlsx');
 const AdmZip   = require('adm-zip');
 const path     = require('path');
-const fs       = require('fs');
 const db       = require('../models/db');
 const auditLog = require('../utils/audit');
-
-const isProd     = process.env.NODE_ENV === 'production';
-const UPLOAD_DIR = isProd
-  ? path.join(__dirname, '../../../public_html/uploads')  // Hostinger: controllers/../backend/../nodejs/../public_html/uploads
-  : path.join(__dirname, '../uploads');
 
 const slugify = str => str.toLowerCase().trim()
   .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -19,6 +13,12 @@ const CATEGORY_MAP = {
   capsules: 3, capsule: 3,
   injections: 4, injection: 4,
   vitamins: 5, vitamin: 5,
+};
+
+// Convert buffer to base64 data URI
+const toBase64 = (buffer, ext) => {
+  const mime = { '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.png':'image/png', '.webp':'image/webp' };
+  return `data:${mime[ext] || 'image/jpeg'};base64,${buffer.toString('base64')}`;
 };
 
 exports.bulkUpload = async (req, res) => {
@@ -42,7 +42,7 @@ exports.bulkUpload = async (req, res) => {
   if (!rows.length) return res.status(400).json({ message: 'Excel file is empty' });
   results.total = rows.length;
 
-  // Extract ZIP images into map: slug → [{ name, ext, buffer }]
+  // Extract ZIP images into map: slug → { ext, buffer }
   const imageMap = {};
   if (zipFile) {
     try {
@@ -52,10 +52,9 @@ exports.bulkUpload = async (req, res) => {
         const name = path.basename(entry.entryName);
         const ext  = path.extname(name).toLowerCase();
         if (!['.jpg','.jpeg','.png','.webp'].includes(ext)) return;
-        const base = path.basename(name, ext).replace(/-\d+$/, '');
-        const slug = slugify(base);
-        if (!imageMap[slug]) imageMap[slug] = [];
-        imageMap[slug].push({ name, ext, buffer: entry.getData() });
+        const base = path.basename(name, ext);
+        const slug = slugify(base.replace(/-\d+$/, ''));
+        if (!imageMap[slug]) imageMap[slug] = { ext, buffer: entry.getData() };
       });
     } catch (e) {
       console.warn('[BulkUpload] ZIP parse error:', e.message);
@@ -88,18 +87,9 @@ exports.bulkUpload = async (req, res) => {
 
       if (price < 1) { results.failed.push({ name, reason: 'Price must be >= 1' }); continue; }
 
-      // Save images
-      let firstImage = null;
-      const productImages = imageMap[slug] || imageMap[slugify(name)] || [];
-      const productDir    = path.join(UPLOAD_DIR, slug);
-
-      if (productImages.length) {
-        if (!fs.existsSync(productDir)) fs.mkdirSync(productDir, { recursive: true });
-        productImages.forEach((img, idx) => {
-          fs.writeFileSync(path.join(productDir, `${idx + 1}${img.ext}`), img.buffer);
-          if (idx === 0) firstImage = `/uploads/${slug}/1${img.ext}`;
-        });
-      }
+      // Get base64 image if available in ZIP
+      const imgEntry  = imageMap[slug] || imageMap[slugify(name)];
+      const imageData = imgEntry ? toBase64(imgEntry.buffer, imgEntry.ext) : null;
 
       // Upsert product
       const [existing] = await db.query('SELECT id FROM products WHERE slug = ?', [slug]);
@@ -110,9 +100,9 @@ exports.bulkUpload = async (req, res) => {
         await db.query(
           `UPDATE products SET name=?,price=?,mrp=?,stock=?,category_id=?,composition=?,
            prescription_required=?,description=?,manufacturer=?,expiry_date=?,is_active=1
-           ${firstImage ? ',image=?' : ''} WHERE id=?`,
-          firstImage
-            ? [name,price,mrp,stock,category_id,composition,rx,description,manufacturer,expiry_date,firstImage,productId]
+           ${imageData ? ',image=?' : ''} WHERE id=?`,
+          imageData
+            ? [name,price,mrp,stock,category_id,composition,rx,description,manufacturer,expiry_date,imageData,productId]
             : [name,price,mrp,stock,category_id,composition,rx,description,manufacturer,expiry_date,productId]
         );
       } else {
@@ -120,23 +110,12 @@ exports.bulkUpload = async (req, res) => {
           `INSERT INTO products (name,slug,price,mrp,stock,category_id,composition,
            prescription_required,description,manufacturer,expiry_date,image,is_active)
            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,1)`,
-          [name,slug,price,mrp,stock,category_id,composition,rx,description,manufacturer,expiry_date,firstImage]
+          [name,slug,price,mrp,stock,category_id,composition,rx,description,manufacturer,expiry_date,imageData]
         );
         productId = r.insertId;
       }
 
-      // Link images in product_images table
-      if (productImages.length) {
-        await db.query('DELETE FROM product_images WHERE product_id = ?', [productId]);
-        for (let i = 0; i < productImages.length; i++) {
-          await db.query(
-            'INSERT INTO product_images (product_id, image_path, sort_order) VALUES (?,?,?)',
-            [productId, `/uploads/${slug}/${i+1}${productImages[i].ext}`, i]
-          );
-        }
-      }
-
-      results.success.push({ name, slug, productId, images: productImages.length });
+      results.success.push({ name, slug, productId, hasImage: !!imageData });
     } catch (err) {
       results.failed.push({ name, reason: err.message });
     }

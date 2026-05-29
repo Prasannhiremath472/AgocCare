@@ -14,12 +14,14 @@ const imageBase = () => {
 
 export const imgUrl = (path) => {
   if (!path) return '/placeholder.webp';
+  if (path.startsWith('data:image')) return path;  // base64 stored in DB
   if (path.startsWith('http')) return path;
   return `${imageBase()}${path.startsWith('/') ? path : '/' + path}`;
 };
 
 export const galleryUrl = (path) => {
   if (!path) return '/placeholder.webp';
+  if (path.startsWith('data:image')) return path;  // base64 stored in DB
   if (path.startsWith('http')) return path;
   return `${imageBase()}${path.startsWith('/') ? path : '/' + path}`;
 };

@@ -3,14 +3,17 @@ const path = require('path');
 const fs = require('fs');
 
 // Products
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024; // 2 MB as base64 (~2.7MB string, but check original size)
+const imageTooLarge = (b64) => b64 && Buffer.byteLength(b64) > MAX_IMAGE_BYTES * 1.4;
+
 exports.createProduct = async (req, res) => {
-  const { name, slug, description, price, mrp, stock, category_id, composition, manufacturer, expiry_date, prescription_required } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : null;
+  const { name, slug, description, price, mrp, stock, category_id, composition, manufacturer, expiry_date, prescription_required, image } = req.body;
+  if (imageTooLarge(image)) return res.status(400).json({ message: 'Image must be 2 MB or smaller' });
   try {
     const [result] = await db.query(
       `INSERT INTO products (name, slug, description, price, mrp, stock, category_id, composition, manufacturer, expiry_date, prescription_required, image)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, slug, description, price, mrp || null, stock, category_id, composition, manufacturer, expiry_date || null, prescription_required ? 1 : 0, image]
+      [name, slug, description || null, price, mrp || null, stock, category_id, composition || null, manufacturer || null, expiry_date || null, prescription_required ? 1 : 0, image || null]
     );
     res.status(201).json({ id: result.insertId, message: 'Product created' });
   } catch (err) {
@@ -20,12 +23,21 @@ exports.createProduct = async (req, res) => {
 };
 
 exports.updateProduct = async (req, res) => {
-  const { name, slug, description, price, mrp, stock, category_id, composition, manufacturer, expiry_date, prescription_required, is_active } = req.body;
-  const fields = { name, slug, description, price, mrp, stock, category_id, composition, manufacturer, expiry_date, prescription_required, is_active };
-  if (req.file) fields.image = `/uploads/${req.file.filename}`;
+  const { name, slug, description, price, mrp, stock, category_id, composition, manufacturer, expiry_date, prescription_required, is_active, image } = req.body;
+  if (imageTooLarge(image)) return res.status(400).json({ message: 'Image must be 2 MB or smaller' });
+  const fields = { name, slug, description, price,
+    mrp:                  mrp         === '' ? null : mrp,
+    stock,                category_id,
+    composition:          composition  === '' ? null : composition,
+    manufacturer:         manufacturer === '' ? null : manufacturer,
+    expiry_date:          expiry_date  === '' ? null : expiry_date,
+    prescription_required, is_active,
+  };
+  if (image) fields.image = image; // base64 string from frontend
 
-  const sets = Object.keys(fields).filter(k => fields[k] !== undefined).map(k => `${k} = ?`).join(', ');
-  const values = Object.keys(fields).filter(k => fields[k] !== undefined).map(k => fields[k]);
+  const keys   = Object.keys(fields).filter(k => fields[k] !== undefined);
+  const sets   = keys.map(k => `${k} = ?`).join(', ');
+  const values = keys.map(k => fields[k]);
 
   try {
     await db.query(`UPDATE products SET ${sets} WHERE id = ?`, [...values, req.params.id]);

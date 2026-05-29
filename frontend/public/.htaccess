@@ -1,10 +1,15 @@
 Options -MultiViews
 RewriteEngine On
 
-# Don't rewrite actual files or directories (handles spaces/%20 in upload folder names)
+# Proxy /api requests to Node.js backend
+RewriteCond %{REQUEST_URI} ^/api/
+RewriteRule ^api/(.*)$ http://localhost:3000/api/$1 [P,L]
+
+# Serve upload files directly (handles folder names with spaces)
 RewriteCond %{REQUEST_URI} ^/uploads/
 RewriteRule ^ - [L]
 
+# SPA fallback — everything else goes to index.html
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ /index.html [QSA,L]

@@ -44,8 +44,8 @@ export const createPaymentOrder = (data) => api.post('/payment/create-order', da
 export const verifyPayment = (data) => api.post('/payment/verify', data);
 
 export const adminGetProducts = (params) => api.get('/admin/products', { params });
-export const adminCreateProduct = (data) => api.post('/admin/products', data, { headers: { 'Content-Type': 'multipart/form-data' } });
-export const adminUpdateProduct = (id, data) => api.put(`/admin/products/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const adminCreateProduct = (data) => api.post('/admin/products', data);
+export const adminUpdateProduct = (id, data) => api.put(`/admin/products/${id}`, data);
 export const adminDeleteProduct = (id) => api.delete(`/admin/products/${id}`);
 export const adminGetOrders = (params) => api.get('/admin/orders', { params });
 export const adminGetOrderDetail = (id) => api.get(`/admin/orders/${id}`);

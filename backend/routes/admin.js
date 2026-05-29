@@ -17,9 +17,9 @@ router.use(auth, adminOnly);
 
 router.get('/dashboard', ctrl.getDashboard);
 
-router.get('/products',      ctrl.getAllProducts);
-router.post('/products',     upload.single('image'), ctrl.createProduct);
-router.put('/products/:id',  upload.single('image'), ctrl.updateProduct);
+router.get('/products',        ctrl.getAllProducts);
+router.post('/products',       ctrl.createProduct);
+router.put('/products/:id',    ctrl.updateProduct);
 router.delete('/products/:id', ctrl.deleteProduct);
 
 router.get('/orders',            ctrl.getAllOrders);

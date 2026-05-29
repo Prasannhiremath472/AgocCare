@@ -40,13 +40,29 @@ export default function AdminProducts() {
     setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
   };
 
+  const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result); // returns "data:image/jpeg;base64,..."
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
   const handleSubmit = async e => {
     e.preventDefault(); setSaving(true);
-    const fd = new FormData();
-    Object.entries(form).forEach(([k, v]) => v !== '' && fd.append(k, v));
-    if (image) fd.append('image', image);
     try {
-      editing ? await adminUpdateProduct(editing, fd) : await adminCreateProduct(fd);
+      const payload = { ...form };
+      // convert empty strings to null for nullable fields
+      ['mrp','composition','manufacturer','expiry_date','description'].forEach(k => {
+        if (payload[k] === '') payload[k] = null;
+      });
+      if (image) {
+        payload.image = await toBase64(image); // new image selected → convert to base64
+      } else if (!form.image) {
+        payload.image = null;                  // admin removed existing image
+      } else {
+        delete payload.image;                  // no change → don't overwrite DB image
+      }
+      editing ? await adminUpdateProduct(editing, payload) : await adminCreateProduct(payload);
       toast.success(editing ? 'Product updated!' : 'Product created!');
       setShowForm(false); fetch();
     } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
@@ -260,21 +276,50 @@ export default function AdminProducts() {
 
                   <div className="col-span-2">
                     <label className="block text-[11px] font-black text-gray-500 mb-1.5 uppercase tracking-wider">Product Image</label>
+
+                    {/* Show existing DB image when editing and no new image selected */}
+                    {editing && form.image && !image && (
+                      <div className="flex items-center gap-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-2">
+                        <img src={imgUrl(form.image)} alt="Current"
+                          className="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white"/>
+                        <div className="flex-1">
+                          <p className="text-xs font-bold text-teal">Current Image</p>
+                          <p className="text-xs text-gray-400 mt-0.5">Select a new image below to replace it</p>
+                        </div>
+                        <button type="button"
+                          onClick={() => setForm(f => ({ ...f, image: null }))}
+                          className="text-xs font-bold text-red-500 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-colors">
+                          Remove
+                        </button>
+                      </div>
+                    )}
+
                     <div
                       onClick={() => document.getElementById('img-input').click()}
                       className="border-2 border-dashed border-gray-200 hover:border-primary rounded-xl p-5 text-center cursor-pointer transition-colors group">
                       <input id="img-input" type="file" accept="image/*"
-                        onChange={e => setImage(e.target.files[0])} className="hidden"/>
+                        onChange={e => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          if (file.size > 2 * 1024 * 1024) {
+                            toast.error('Image must be 2 MB or smaller');
+                            e.target.value = '';
+                            return;
+                          }
+                          setImage(file);
+                        }} className="hidden"/>
                       {image ? (
-                        <div className="flex items-center justify-center gap-2 text-primary">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                          </svg>
-                          <span className="text-sm font-semibold">{image.name}</span>
+                        <div className="flex items-center justify-center gap-3">
+                          <img src={URL.createObjectURL(image)} alt="Preview"
+                            className="w-14 h-14 object-contain rounded-lg border border-gray-200"/>
+                          <div className="text-left">
+                            <p className="text-sm font-semibold text-primary">{image.name}</p>
+                            <p className="text-xs text-gray-400">{(image.size / 1024).toFixed(0)} KB · Click to change</p>
+                          </div>
                         </div>
                       ) : (
                         <p className="text-sm text-gray-400 group-hover:text-primary transition-colors">
-                          Click to upload image (JPG, PNG — max 2MB)
+                          {editing && form.image ? 'Click to replace image (JPG, PNG — max 2 MB)' : 'Click to upload image (JPG, PNG — max 2 MB)'}
                         </p>
                       )}
                     </div>
