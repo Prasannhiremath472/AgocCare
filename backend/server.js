@@ -76,17 +76,33 @@ app.get('/', (req, res) => {
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 
-// Upload diagnostic route — remove after confirming uploads work
+// Upload diagnostic route
 const fs = require('fs');
 const upload = require('./middleware/upload');
-app.post('/api/test-upload', upload.single('image'), (req, res) => {
-  if (!req.file) return res.status(400).json({ message: 'No file received', body: req.body });
-  res.json({ message: 'Upload OK', file: req.file.filename, path: req.file.path });
-});
 app.get('/api/test-upload', (req, res) => {
-  const uploadDir = path.join(__dirname, 'uploads');
-  const files = fs.existsSync(uploadDir) ? fs.readdirSync(uploadDir) : [];
-  res.json({ uploadDir, files, writable: (() => { try { fs.accessSync(uploadDir, fs.constants.W_OK); return true; } catch { return false; } })() });
+  const isProd    = process.env.NODE_ENV === 'production';
+  const devDir    = path.join(__dirname, 'uploads');
+  const prodDir   = path.join(__dirname, '../../public_html/uploads');
+  const activeDir = isProd ? prodDir : devDir;
+  const exists    = fs.existsSync(activeDir);
+  const writable  = exists ? (() => { try { fs.accessSync(activeDir, fs.constants.W_OK); return true; } catch { return false; } })() : false;
+  const files     = exists ? fs.readdirSync(activeDir).slice(0, 20) : [];
+  res.json({
+    NODE_ENV: process.env.NODE_ENV,
+    isProd,
+    __dirname,
+    activeDir,
+    exists,
+    writable,
+    files,
+    devDir,
+    prodDir,
+    prodDirExists: fs.existsSync(prodDir),
+  });
+});
+app.post('/api/test-upload', upload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ message: 'No file received' });
+  res.json({ message: 'Upload OK', file: req.file.filename, savedTo: req.file.path });
 });
 
 // Global Express error handler — catches any thrown errors in routes
