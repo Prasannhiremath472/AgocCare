@@ -48,6 +48,7 @@ export const adminCreateProduct = (data) => api.post('/admin/products', data, { 
 export const adminUpdateProduct = (id, data) => api.put(`/admin/products/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
 export const adminDeleteProduct = (id) => api.delete(`/admin/products/${id}`);
 export const adminGetOrders = (params) => api.get('/admin/orders', { params });
+export const adminGetOrderDetail = (id) => api.get(`/admin/orders/${id}`);
 export const adminUpdateOrder = (id, data) => api.put(`/admin/orders/${id}/status`, data);
 export const adminGetUsers = () => api.get('/admin/users');
 export const adminDashboard = () => api.get('/admin/dashboard');

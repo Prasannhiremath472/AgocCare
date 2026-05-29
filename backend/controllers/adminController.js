@@ -84,6 +84,27 @@ exports.getAllOrders = async (req, res) => {
   }
 };
 
+exports.getOrderDetail = async (req, res) => {
+  try {
+    const [[order]] = await db.query(
+      `SELECT o.*, u.name as customer, u.email, u.phone as customer_phone
+       FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?`,
+      [req.params.id]
+    );
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+
+    const [items] = await db.query(
+      `SELECT oi.qty, oi.price, p.name, p.image, p.slug
+       FROM order_items oi JOIN products p ON oi.product_id = p.id
+       WHERE oi.order_id = ?`,
+      [req.params.id]
+    );
+    res.json({ ...order, items });
+  } catch {
+    res.status(500).json({ message: 'Failed to fetch order detail' });
+  }
+};
+
 exports.updateOrderStatus = async (req, res) => {
   const { status } = req.body;
   const allowed = ['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'];

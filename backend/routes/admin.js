@@ -23,6 +23,7 @@ router.put('/products/:id',  upload.single('image'), ctrl.updateProduct);
 router.delete('/products/:id', ctrl.deleteProduct);
 
 router.get('/orders',            ctrl.getAllOrders);
+router.get('/orders/:id',        ctrl.getOrderDetail);
 router.put('/orders/:id/status', ctrl.updateOrderStatus);
 
 router.get('/users', ctrl.getAllUsers);
