@@ -1,5 +1,10 @@
 Options -MultiViews
 RewriteEngine On
+
+# Don't rewrite actual files or directories (handles spaces/%20 in upload folder names)
+RewriteCond %{REQUEST_URI} ^/uploads/
+RewriteRule ^ - [L]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ /index.html [QSA,L]

@@ -5,7 +5,10 @@ const fs       = require('fs');
 const db       = require('../models/db');
 const auditLog = require('../utils/audit');
 
-const UPLOAD_DIR = path.join(__dirname, '../uploads');
+const isProd     = process.env.NODE_ENV === 'production';
+const UPLOAD_DIR = isProd
+  ? path.join(__dirname, '../../../public_html/uploads')  // Hostinger: controllers/../backend/../nodejs/../public_html/uploads
+  : path.join(__dirname, '../uploads');
 
 const slugify = str => str.toLowerCase().trim()
   .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
