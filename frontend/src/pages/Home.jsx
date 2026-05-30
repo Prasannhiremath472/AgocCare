@@ -48,9 +48,9 @@ const WHY = [
 ];
 
 const STATS = [
-  { value:'2M+',  label:'Happy Customers' },
-  { value:'50K+', label:'Products Listed'  },
-  { value:'500+', label:'Brands Available' },
+  { value:'3000',  label:'Associated doctors' },
+  { value:'70', label:'Products Listed'  },
+  { value:'45+', label:'Brands Available' },
   { value:'99%',  label:'On-Time Delivery' },
 ];
 

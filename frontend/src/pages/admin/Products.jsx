@@ -278,21 +278,40 @@ export default function AdminProducts() {
                     <label className="block text-[11px] font-black text-gray-500 mb-1.5 uppercase tracking-wider">Product Image</label>
 
                     {/* Show existing DB image when editing and no new image selected */}
-                    {editing && form.image && !image && (
-                      <div className="flex items-center gap-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-2">
-                        <img src={imgUrl(form.image)} alt="Current"
-                          className="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white"/>
-                        <div className="flex-1">
-                          <p className="text-xs font-bold text-teal">Current Image</p>
-                          <p className="text-xs text-gray-400 mt-0.5">Select a new image below to replace it</p>
+                    {editing && form.image && !image && (() => {
+                      const isBase64 = form.image.startsWith('data:image');
+                      return (
+                        <div className={`flex items-center gap-4 rounded-xl px-4 py-3 mb-2 border ${isBase64 ? 'bg-gray-50 border-gray-200' : 'bg-amber-50 border-amber-200'}`}>
+                          {isBase64 ? (
+                            <img src={form.image} alt="Current"
+                              className="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0"/>
+                          ) : (
+                            <div className="w-16 h-16 rounded-lg border border-amber-200 bg-amber-100 flex items-center justify-center text-2xl shrink-0">
+                              🖼️
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            {isBase64 ? (
+                              <>
+                                <p className="text-xs font-bold text-teal">Current Image</p>
+                                <p className="text-xs text-gray-400 mt-0.5">Select a new image below to replace it</p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="text-xs font-bold text-amber-700">Old image path (file may not load)</p>
+                                <p className="text-xs text-amber-600 mt-0.5 truncate font-mono">{form.image}</p>
+                                <p className="text-xs text-amber-500 mt-0.5">Upload a new image below to replace it</p>
+                              </>
+                            )}
+                          </div>
+                          <button type="button"
+                            onClick={() => setForm(f => ({ ...f, image: null }))}
+                            className="text-xs font-bold text-red-500 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-colors shrink-0">
+                            Remove
+                          </button>
                         </div>
-                        <button type="button"
-                          onClick={() => setForm(f => ({ ...f, image: null }))}
-                          className="text-xs font-bold text-red-500 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-colors">
-                          Remove
-                        </button>
-                      </div>
-                    )}
+                      );
+                    })()}
 
                     <div
                       onClick={() => document.getElementById('img-input').click()}

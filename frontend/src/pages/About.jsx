@@ -25,7 +25,7 @@ const GALLERY = [
 ];
 
 const SECTIONS = [
-  { id: 'wholesale',    label: 'Our Wholesale Shop' },
+  { id: 'company-info', label: 'Our Wholesale Shop' },
   { id: 'retail',       label: 'Our Retail Shops'   },
   { id: 'our-products', label: 'Our Products'        },
   { id: 'gallery',      label: 'Gallery'             },
@@ -61,35 +61,55 @@ export default function About() {
               className="h-24 w-auto object-contain mx-auto mb-6 rounded-2xl shadow-lg bg-white p-2"
             />
             <motion.p variants={fadeUp} className="text-xs font-bold text-secondary uppercase tracking-widest mb-3">About Us</motion.p>
-            <motion.h1 variants={fadeUp} className="text-4xl md:text-5xl font-extrabold text-white mb-4">
+            {/* <motion.h1 variants={fadeUp} className="text-4xl md:text-5xl font-extrabold text-white mb-4">
               Agoc Care Pvt. Ltd.
-            </motion.h1>
-            <motion.p variants={fadeUp} className="text-white/70 text-base leading-relaxed">
+            </motion.h1> */}
+            {/* <motion.p variants={fadeUp} className="text-white/70 text-base leading-relaxed">
               Empowering Life — Licensed pharma marketing, wholesale & retail since 2016.
-            </motion.p>
+            </motion.p> */}
           </motion.div>
 
           {/* Quick nav pills */}
           <motion.div variants={staggerContainer(0.08)} initial="hidden" animate="visible"
-            className="flex flex-wrap justify-center gap-3 mt-8">
-            {SECTIONS.map(s => (
-              <motion.a key={s.id} variants={staggerItem} href={`#${s.id}`}
-                onClick={e => { e.preventDefault(); document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth' }); }}
-                className="px-4 py-2 bg-white/15 border border-white/30 text-white text-xs font-semibold rounded-lg hover:bg-white/25 transition-colors cursor-pointer">
-                {s.label}
-              </motion.a>
-            ))}
+            className="flex flex-col items-center gap-3 mt-10 w-full max-w-2xl mx-auto">
+
+            {/* Row 1 — two big featured buttons */}
+            <div className="grid grid-cols-2 gap-3 w-full">
+              {SECTIONS.slice(0, 2).map(s => (
+                <motion.a key={s.id} variants={staggerItem} href={`#${s.id}`}
+                  onClick={e => { e.preventDefault(); document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth' }); }}
+                  whileHover={{ scale: 1.04, backgroundColor: 'rgba(255,255,255,0.35)' }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex flex-col items-center justify-center gap-1 px-6 py-5 bg-white/25 border-2 border-white/50 text-white text-base font-black rounded-2xl hover:bg-white/35 transition-colors cursor-pointer shadow-xl tracking-wide text-center">
+                  <span className="text-2xl">{s.id === 'wholesale' ? '🏭' : '🏪'}</span>
+                  {s.label}
+                </motion.a>
+              ))}
+            </div>
+
+            {/* Row 2 — remaining smaller buttons */}
+            <div className="flex flex-wrap justify-center gap-3 w-full">
+              {SECTIONS.slice(2).map(s => (
+                <motion.a key={s.id} variants={staggerItem} href={`#${s.id}`}
+                  onClick={e => { e.preventDefault(); document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth' }); }}
+                  whileHover={{ scale: 1.06, backgroundColor: 'rgba(255,255,255,0.30)' }}
+                  whileTap={{ scale: 0.97 }}
+                  className="px-6 py-3 bg-white/20 border-2 border-white/40 text-white text-sm font-bold rounded-xl hover:bg-white/30 transition-colors cursor-pointer shadow-lg tracking-wide">
+                  {s.label}
+                </motion.a>
+              ))}
+            </div>
           </motion.div>
         </section>
 
-        {/* ── Wholesale ── */}
-        <section id="wholesale" className="section bg-white scroll-mt-20">
+        {/* ── Section 1: Company Information ── */}
+        <section id="company-info" className="section bg-white scroll-mt-20">
           <div className="container mx-auto max-w-5xl">
-            <motion.div className="grid md:grid-cols-2 gap-10 items-center"
+            <motion.div className="grid md:grid-cols-2 gap-10 items-start"
               variants={staggerContainer(0.1)} initial="hidden" whileInView="visible" viewport={viewport}>
               <motion.div variants={fadeLeft}>
-                <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-2">Wholesale</p>
-                <h2 className="text-3xl font-extrabold text-teal mb-4">Our Wholesale Shop</h2>
+                <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-2">About Us</p>
+                <h2 className="text-3xl font-extrabold text-teal mb-4">Company Information</h2>
                 <p className="text-gray-500 leading-relaxed mb-3">
                   Agoc Care Private Limited operates a fully licensed wholesale division supplying pharmaceutical products to retailers, hospitals, clinics, and distributors across Maharashtra and pan-India.
                 </p>
@@ -107,21 +127,82 @@ export default function About() {
                   ))}
                 </div>
               </motion.div>
-              <motion.div variants={fadeRight}
-                className="bg-primary/5 rounded-3xl p-8 border border-primary/10 flex flex-col gap-4">
-                {[
-                  { label:'Wholesale License', value:'20B-618039' },
-                  { label:'Drug License', value:'21B-618040' },
-                  { label:'GSTIN', value:'27AAOCA4424F1ZQ' },
-                  { label:'Established', value:'2016' },
-                  { label:'Type', value:'Pharma Marketing & Wholesale' },
-                ].map(r => (
-                  <div key={r.label} className="flex justify-between border-b border-primary/10 pb-3 last:border-0 last:pb-0">
-                    <span className="text-sm font-bold text-teal">{r.label}</span>
-                    <span className="text-sm text-gray-600">{r.value}</span>
-                  </div>
-                ))}
+              <motion.div variants={fadeRight}>
+                <div className="bg-primary/5 rounded-3xl p-6 border border-primary/10 flex flex-col gap-3">
+                  <p className="text-xs font-black text-primary uppercase tracking-widest mb-1">Company Details</p>
+                  {[
+                    { label:'Wholesale License', value:'20B-618039' },
+                    { label:'Drug License',       value:'21B-618040' },
+                    { label:'GSTIN',              value:'27AAOCA4424F1ZQ' },
+                    { label:'Established',        value:'2016' },
+                    { label:'Type',               value:'Pharma Marketing & Wholesale' },
+                  ].map(r => (
+                    <div key={r.label} className="flex justify-between border-b border-primary/10 pb-2.5 last:border-0 last:pb-0">
+                      <span className="text-sm font-bold text-teal">{r.label}</span>
+                      <span className="text-sm text-gray-600">{r.value}</span>
+                    </div>
+                  ))}
+                </div>
               </motion.div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── Section 2: Our Wholesale Shop ── */}
+        <section id="wholesale" className="section bg-primary/5 scroll-mt-20">
+          <div className="container mx-auto max-w-5xl">
+            <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={viewport}
+              className="text-center mb-10">
+              <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-2">Locations</p>
+              <h2 className="text-3xl font-extrabold text-teal">Our Wholesale Shop</h2>
+              <p className="text-gray-500 text-sm mt-2 max-w-xl mx-auto">Visit us at any of our registered locations across Maharashtra.</p>
+            </motion.div>
+            <motion.div className="grid md:grid-cols-3 gap-6"
+              variants={staggerContainer(0.1)} initial="hidden" whileInView="visible" viewport={viewport}>
+              {[
+                {
+                  type: 'Registered Office',
+                  name: 'Agoc Care Pvt. Ltd.',
+                  address: '484/2 Waras Gaon Naka, Post Kolad, Taluka - Roha, Dist - Raigad, Maharashtra, India 402304',
+                  icon: '🏢',
+                  color: 'bg-blue-50 border-blue-200',
+                  badge: 'bg-blue-100 text-blue-700',
+                  header: 'bg-blue-600',
+                },
+                {
+                  type: 'Depot Address',
+                  name: 'Agoc Care Pvt. Ltd.',
+                  address: 'Shree Complex, Shop No. 1, First Floor, Main Road Kodoli, Tal - Panhala, Dist - Kolhapur 416114',
+                  icon: '🏭',
+                  color: 'bg-purple-50 border-purple-200',
+                  badge: 'bg-purple-100 text-purple-700',
+                  header: 'bg-purple-600',
+                },
+                {
+                  type: 'Shop Address',
+                  name: 'Aapli Farmacy',
+                  address: '1511 2nd Floor, Mahalaxmi Square, Kodoli, Tal - Panhala, Dist - Kolhapur 416114',
+                  icon: '🏪',
+                  color: 'bg-green-50 border-green-200',
+                  badge: 'bg-green-100 text-green-700',
+                  header: 'bg-green-600',
+                },
+              ].map((loc, i) => (
+                <motion.div key={i} variants={staggerItem}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  className={`rounded-2xl border overflow-hidden shadow-sm ${loc.color}`}>
+                  {/* Card header */}
+                  <div className={`${loc.header} px-5 py-4 flex items-center gap-3`}>
+                    <span className="text-3xl">{loc.icon}</span>
+                    <span className="text-white font-black text-sm tracking-wide">{loc.type}</span>
+                  </div>
+                  {/* Card body */}
+                  <div className="px-5 py-5">
+                    <p className="text-sm font-black text-teal mb-2">{loc.name}</p>
+                    <p className="text-xs text-gray-600 leading-relaxed">{loc.address}</p>
+                  </div>
+                </motion.div>
+              ))}
             </motion.div>
           </div>
         </section>
@@ -129,46 +210,61 @@ export default function About() {
         {/* ── Retail ── */}
         <section id="retail" className="section bg-teal-light scroll-mt-20">
           <div className="container mx-auto max-w-5xl">
-            <motion.div className="grid md:grid-cols-2 gap-10 items-center"
-              variants={staggerContainer(0.1)} initial="hidden" whileInView="visible" viewport={viewport}>
-              <motion.div variants={fadeRight} className="md:order-2">
-                <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-2">Retail</p>
-                <h2 className="text-3xl font-extrabold text-teal mb-4">Our Retail Shops</h2>
-                <p className="text-gray-500 leading-relaxed mb-3">
-                  Our retail operations serve individual customers directly through our registered pharmacy outlet. We provide genuine medicines, healthcare products, and personalized guidance from trained staff.
-                </p>
-                <p className="text-gray-500 leading-relaxed mb-4">
-                  Customers can walk in or place orders online through our website for home delivery across India.
-                </p>
-                <div className="bg-white rounded-2xl p-5 border border-teal-mid/30 space-y-3 text-sm">
-                  {[
-                    { icon:'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z', text:'Palladium Building, Near Pristine Womens Hospital, Assembly Road, Shahupuri, Kolhapur' },
-                    { icon:'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', text:'Mon–Sat: 9:00 AM – 7:00 PM' },
-                    { icon:'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z', text:'+91 99232 68310' },
-                  ].map(r => (
-                    <div key={r.text} className="flex gap-3">
-                      <svg className="w-4 h-4 text-primary shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={r.icon}/>
+            <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={viewport}
+              className="text-center mb-10">
+              <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-2">Retail</p>
+              <h2 className="text-3xl font-extrabold text-teal">Our Retail Shops</h2>
+              <p className="text-gray-500 text-sm mt-2 max-w-xl mx-auto">
+                Find us at these locations across Kolhapur and nearby areas. Click the map icon to get directions.
+              </p>
+            </motion.div>
+
+            <motion.div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
+              variants={staggerContainer(0.06)} initial="hidden" whileInView="visible" viewport={viewport}>
+              {[
+                { name:'Amit R Medical', area:'Paanch Bangala',  gmb:'https://www.google.com/maps/search/?api=1&query=Amit+R+Medical+Pach+Bangala+Kolhapur' },
+                { name:'Amit R Medical', area:'Rajarampuri',     gmb:'https://www.google.com/maps/search/?api=1&query=16.7011493,74.2411152' },
+                { name:'Amit R Medical', area:'Racecourse Naka', gmb:'https://www.google.com/maps?q=16.6815052,74.2226502' },
+                { name:'Amit R Medical', area:'Station Road',    gmb:'https://www.google.com/maps/search/?api=1&query=Amit+R+Medical+Station+Road+Kolhapur' },
+                { name:'Amit R Medical', area:'Rankala Stand',   gmb:'https://www.google.com/maps/search/?api=1&query=Amit+R+Medical+Rankala+Kolhapur' },
+                { name:'Amit R Medical', area:'Nagala Park',     gmb:'https://www.google.com/maps/search/?api=1&query=Amit+R+Medical+Nagala+Park+Kolhapur' },
+                { name:'Amit R Medical', area:'Kodoli',          gmb:'https://www.google.com/maps/search/?api=1&query=16.8721078,74.1923861' },
+                { name:'Amit R Medical', area:'Khed',            gmb:'https://www.google.com/maps/search/?api=1&query=Amit+R+Medical+Khed+Kolhapur' },
+                { name:'Amit R Medical', area:'Hupari',          gmb:'https://www.google.com/maps/search/?api=1&query=Amit+R+Medical+Hupari+Kolhapur' },
+                { name:'D&C Care Pharmacy',  area:'Gadhinglaj',    gmb:'https://www.google.com/maps/search/?api=1&query=D%26C+Care+Pharmacy+Gadhinglaj+Kolhapur' },
+                { name:'Princess Matching',  area:'Gadhinglaj',    gmb:'https://www.google.com/maps/search/?api=1&query=Princess+Matching+Gadhinglaj+Kolhapur' },
+                { name:'My Baby',            area:'Ghati Darwaja', gmb:'https://www.google.com/maps/search/?api=1&query=My+Baby+Ghati+Darwaja+Kolhapur' },
+              ].map((shop, i) => (
+                <motion.div key={i} variants={staggerItem}
+                  whileHover={{ y:-3, transition:{ duration:0.2 } }}
+                  className="bg-white rounded-2xl border border-teal-mid/30 shadow-sm px-4 py-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-lg shrink-0">🏪</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-black text-teal truncate">{shop.name}</p>
+                    <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                      <svg className="w-3 h-3 text-secondary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                       </svg>
-                      <span className="text-gray-600">{r.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-              <motion.div variants={fadeLeft} className="md:order-1">
-                <div className="bg-primary rounded-3xl p-8 text-white text-center">
-                  <div className="text-6xl font-extrabold mb-2">2016</div>
-                  <div className="text-white/70 text-sm mb-6">Serving since</div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {[['100%','Genuine Products'],['Pan India','Delivery'],['Licensed','Pharmacy'],['Trusted','Brand']].map(([v,l]) => (
-                      <div key={l} className="bg-white/10 rounded-xl p-3">
-                        <div className="font-extrabold text-lg">{v}</div>
-                        <div className="text-white/70 text-xs">{l}</div>
-                      </div>
-                    ))}
+                      {shop.area}
+                    </p>
                   </div>
-                </div>
-              </motion.div>
+                  {shop.gmb ? (
+                    <a href={shop.gmb} target="_blank" rel="noopener noreferrer"
+                      className="shrink-0 w-8 h-8 rounded-lg bg-primary flex items-center justify-center hover:bg-primary-dark transition-colors"
+                      title="View on Google Maps">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      </svg>
+                    </a>
+                  ) : null}
+                </motion.div>
+              ))}
+            </motion.div>
+
+            <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={viewport}
+              className="mt-8 bg-primary/5 rounded-2xl p-4 border border-primary/15 text-center text-xs text-gray-500">
+              📞 For retail enquiries call: <a href="tel:+919923268310" className="text-primary font-bold">+91 99232 68310</a>
+              &nbsp;·&nbsp; Mon–Sat: 9:00 AM – 7:00 PM
             </motion.div>
           </div>
         </section>
