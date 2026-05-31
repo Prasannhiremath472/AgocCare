@@ -42,16 +42,30 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           return CustomScrollView(
             slivers: [
               SliverAppBar(
-                expandedHeight: 300,
+                expandedHeight: 280,
                 pinned: true,
-                backgroundColor: AppColors.primary,
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.textPrimary,
+                elevation: 1,
+                leading: GestureDetector(
+                  onTap: () => context.pop(),
+                  child: Container(
+                    margin: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 6)],
+                    ),
+                    child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
+                  ),
+                ),
                 flexibleSpace: FlexibleSpaceBar(
                   background: allImages.isNotEmpty
                       ? GestureDetector(
                           onTap: () => _showImageViewer(context, AppHelpers.imgUrl(allImages[_selectedImage])),
                           child: AppImage(
                             url: AppHelpers.imgUrl(allImages[_selectedImage]),
-                            fit: BoxFit.cover,
+                            fit: BoxFit.contain,
                           ),
                         )
                       : Container(

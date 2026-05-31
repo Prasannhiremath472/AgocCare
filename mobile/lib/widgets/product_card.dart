@@ -7,6 +7,7 @@ import '../providers/cart_provider.dart';
 import '../widgets/app_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// Compact vertical card — used in trending/featured grids
 class ProductCard extends ConsumerWidget {
   final ProductModel product;
   const ProductCard({super.key, required this.product});
@@ -24,91 +25,196 @@ class ProductCard extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          boxShadow: [
-            BoxShadow(color: AppColors.primary.withOpacity(0.07), blurRadius: 12, offset: const Offset(0, 4)),
-          ],
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image
+            // Image — compact height
             Stack(
               children: [
                 AppImage(
                   url: imageUrl,
-                  height: 130,
+                  height: 100,
                   width: double.infinity,
-                  fit: BoxFit.cover,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
-                  placeholder: _imagePlaceholder(),
+                  fit: BoxFit.contain,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                  placeholder: Container(
+                    height: 100,
+                    color: AppColors.primaryLight,
+                    child: const Center(child: Icon(Icons.medication_rounded, size: 36, color: AppColors.primary)),
+                  ),
                 ),
                 if (discount > 0)
                   Positioned(
-                    top: 8, left: 8,
+                    top: 6, left: 6,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(color: AppColors.cta, borderRadius: BorderRadius.circular(20)),
-                      child: Text('$discount% OFF', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(color: AppColors.cta, borderRadius: BorderRadius.circular(4)),
+                      child: Text('$discount% OFF', style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800)),
                     ),
                   ),
                 if (product.prescriptionRequired)
                   Positioned(
-                    top: 8, right: 8,
+                    top: 6, right: 6,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                      decoration: BoxDecoration(color: AppColors.error.withOpacity(0.9), borderRadius: BorderRadius.circular(6)),
-                      child: const Text('Rx', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      decoration: BoxDecoration(color: AppColors.error, borderRadius: BorderRadius.circular(4)),
+                      child: const Text('Rx', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800)),
                     ),
                   ),
               ],
             ),
-            // Info
+            // Info — Expanded so Spacer pushes button to bottom always
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(6, 5, 6, 6),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Fixed 2-line height — same space for all cards
+                    SizedBox(
+                      height: 28,
+                      child: Text(product.name,
+                        maxLines: 2, overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textPrimary, height: 1.3)),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(AppHelpers.formatPrice(product.price),
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                    if (product.mrp != null && product.mrp! > product.price)
+                      Text(AppHelpers.formatPrice(product.mrp!),
+                        style: const TextStyle(fontSize: 9, color: AppColors.textMuted, decoration: TextDecoration.lineThrough),
+                        overflow: TextOverflow.ellipsis),
+                    // Pushes button to bottom regardless of content above
+                    const Spacer(),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 26,
+                      child: inCart
+                          ? OutlinedButton(
+                              onPressed: () => context.push('/cart'),
+                              style: OutlinedButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                side: const BorderSide(color: AppColors.primary),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                              ),
+                              child: const Text('In Cart', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                            )
+                          : ElevatedButton(
+                              onPressed: product.inStock && !product.prescriptionRequired
+                                  ? () => ref.read(cartProvider.notifier).addItem(product)
+                                  : null,
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                                textStyle: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700),
+                              ),
+                              child: Text(product.prescriptionRequired
+                                  ? 'Rx Only'
+                                  : product.inStock ? 'Add to Cart' : 'Sold Out'),
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Horizontal compact card — used in horizontal scroll lists
+class ProductCardHorizontal extends ConsumerWidget {
+  final ProductModel product;
+  const ProductCardHorizontal({super.key, required this.product});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final inCart = ref.watch(cartProvider.select(
+      (items) => items.any((e) => e.product.id == product.id),
+    ));
+    final imageUrl = AppHelpers.imgUrl(product.image);
+    final discount = product.discountPercent;
+
+    return GestureDetector(
+      onTap: () => context.push('/medicines/${product.slug}'),
+      child: Container(
+        width: 140,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                AppImage(
+                  url: imageUrl,
+                  height: 110,
+                  width: 140,
+                  fit: BoxFit.contain,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                  placeholder: Container(
+                    height: 110, width: 140,
+                    color: AppColors.primaryLight,
+                    child: const Center(child: Icon(Icons.medication_rounded, size: 40, color: AppColors.primary)),
+                  ),
+                ),
+                if (discount > 0)
+                  Positioned(
+                    top: 6, left: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(color: AppColors.cta, borderRadius: BorderRadius.circular(4)),
+                      child: Text('$discount% OFF', style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800)),
+                    ),
+                  ),
+              ],
+            ),
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(product.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                    maxLines: 2, overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textPrimary, height: 1.3)),
                   const SizedBox(height: 4),
-                  if (product.manufacturer != null)
-                    Text(product.manufacturer!, maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                  Text(AppHelpers.formatPrice(product.price),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                  if (product.mrp != null && product.mrp! > product.price)
+                    Text(AppHelpers.formatPrice(product.mrp!),
+                      style: const TextStyle(fontSize: 10, color: AppColors.textMuted, decoration: TextDecoration.lineThrough)),
                   const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Text(AppHelpers.formatPrice(product.price),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                      if (product.mrp != null && product.mrp! > product.price) ...[
-                        const SizedBox(width: 4),
-                        Text(AppHelpers.formatPrice(product.mrp!),
-                          style: const TextStyle(fontSize: 11, color: AppColors.textMuted,
-                            decoration: TextDecoration.lineThrough)),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
-                    height: 34,
+                    height: 28,
                     child: inCart
-                        ? OutlinedButton.icon(
+                        ? OutlinedButton(
                             onPressed: () => context.push('/cart'),
-                            icon: const Icon(Icons.shopping_cart, size: 14),
-                            label: const Text('In Cart', style: TextStyle(fontSize: 12)),
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              side: const BorderSide(color: AppColors.primary),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                            ),
+                            child: const Text('In Cart ✓', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.primary)),
                           )
                         : ElevatedButton(
-                            onPressed: product.inStock
+                            onPressed: product.inStock && !product.prescriptionRequired
                                 ? () => ref.read(cartProvider.notifier).addItem(product)
                                 : null,
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.zero,
-                              textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                              textStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700),
                             ),
-                            child: Text(product.inStock ? 'Add to Cart' : 'Out of Stock'),
+                            child: Text(product.inStock ? 'ADD' : 'Out of Stock'),
                           ),
                   ),
                 ],
@@ -119,10 +225,4 @@ class ProductCard extends ConsumerWidget {
       ),
     );
   }
-
-  Widget _imagePlaceholder() => Container(
-    height: 130,
-    color: AppColors.primaryLight,
-    child: const Center(child: Icon(Icons.medication_rounded, size: 48, color: AppColors.primary)),
-  );
 }

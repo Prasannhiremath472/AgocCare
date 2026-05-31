@@ -227,24 +227,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
               const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
-              // ── Category Cards ────────────────────────────────────────────
+              // ── Category Cards (3 boxes like screenshot) ──────────────
               SliverToBoxAdapter(
                 child: Container(
                   color: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                   child: categories.when(
                     data: (list) => list.isEmpty
                         ? const SizedBox()
-                        : _CategoryCards(categories: list),
-                    loading: () => SizedBox(
-                      height: 110,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: 4,
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
-                        itemBuilder: (_, __) => ShimmerCard(height: 90, width: 90, radius: AppRadius.lg),
-                      ),
+                        : _CategoryBoxes(categories: list),
+                    loading: () => Row(
+                      children: List.generate(3, (_) => Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: ShimmerCard(height: 100, radius: AppRadius.md),
+                        ),
+                      )),
                     ),
                     error: (_, __) => const SizedBox(),
                   ),
@@ -301,13 +299,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     : SliverToBoxAdapter(
                         child: Container(
                           color: Colors.white,
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
                           child: GridView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2, childAspectRatio: 0.65,
-                              crossAxisSpacing: 10, mainAxisSpacing: 10,
+                              crossAxisCount: 3,
+                              childAspectRatio: 0.55,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
                             ),
                             itemCount: list.length,
                             itemBuilder: (_, i) => ProductCard(product: list[i]),
@@ -316,7 +316,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                 loading: () => const SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(12),
                     child: ShimmerProductGrid(),
                   ),
                 ),
@@ -414,51 +414,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-// ── Category Cards (3-column grid like screenshot) ──────────────────────────
-class _CategoryCards extends StatelessWidget {
+// ── 3 Category Boxes exactly like screenshot ─────────────────────────────────
+class _CategoryBoxes extends StatelessWidget {
   final List<CategoryModel> categories;
-  const _CategoryCards({required this.categories});
+  const _CategoryBoxes({required this.categories});
 
   @override
   Widget build(BuildContext context) {
-    final display = categories.take(6).toList();
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: display.map((cat) {
-          final imageUrl = AppHelpers.imgUrl(cat.image);
-          return GestureDetector(
-            onTap: () => context.push('${AppRoutes.products}?category=${cat.slug}'),
-            child: SizedBox(
-              width: (MediaQuery.of(context).size.width - 56) / 3,
-              child: Column(
-                children: [
-                  Container(
-                    height: 75,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryLight,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(11),
-                      child: imageUrl.isNotEmpty
-                          ? AppImage(url: imageUrl, fit: BoxFit.cover, width: double.infinity, height: double.infinity)
-                          : Center(child: Icon(Icons.category_rounded, color: AppColors.primary, size: 32)),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(cat.name,
-                    textAlign: TextAlign.center, maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textPrimary, height: 1.2)),
-                ],
-              ),
+    // Show only first 3 categories as large boxes
+    final display = categories.take(3).toList();
+    final boxW = (MediaQuery.of(context).size.width - 48) / 3;
+
+    return Row(
+      children: display.asMap().entries.map((entry) {
+        final cat = entry.value;
+        final imageUrl = AppHelpers.imgUrl(cat.image);
+        return GestureDetector(
+          onTap: () => context.push('${AppRoutes.products}?category=${cat.slug}'),
+          child: Container(
+            width: boxW,
+            margin: EdgeInsets.only(right: entry.key < display.length - 1 ? 8 : 0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.border),
             ),
-          );
-        }).toList(),
-      ),
+            child: Column(
+              children: [
+                // Image box
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                  child: imageUrl.isNotEmpty
+                      ? AppImage(
+                          url: imageUrl,
+                          height: 80, width: double.infinity,
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          height: 80, width: double.infinity,
+                          color: AppColors.primaryLight,
+                          child: const Icon(Icons.category_rounded, color: AppColors.primary, size: 36),
+                        ),
+                ),
+                // Label
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                  child: Text(
+                    cat.name,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textPrimary, height: 1.2),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

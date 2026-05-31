@@ -34,10 +34,10 @@ class ShimmerProductGrid extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, childAspectRatio: 0.7, crossAxisSpacing: 12, mainAxisSpacing: 12,
+        crossAxisCount: 3, childAspectRatio: 0.58, crossAxisSpacing: 8, mainAxisSpacing: 8,
       ),
-      itemCount: 6,
-      itemBuilder: (_, __) => const ShimmerCard(height: 220),
+      itemCount: 9,
+      itemBuilder: (_, __) => const ShimmerCard(height: 180),
     );
   }
 }

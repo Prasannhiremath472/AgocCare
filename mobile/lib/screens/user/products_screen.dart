@@ -145,9 +145,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                         ),
                       )
                     : GridView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.all(12),
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2, childAspectRatio: 0.62, crossAxisSpacing: 12, mainAxisSpacing: 12,
+                          crossAxisCount: 3,
+                          childAspectRatio: 0.55,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
                         ),
                         itemCount: state.products.length,
                         itemBuilder: (_, i) => ProductCard(product: state.products[i]),
