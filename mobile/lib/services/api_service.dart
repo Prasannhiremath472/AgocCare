@@ -40,13 +40,24 @@ class ApiService {
     String? order,
     bool? prescriptionRequired,
   }) async {
+    // Backend accepts: sort=price_asc | price_desc | name | (default=newest)
+    String? sortParam;
+    if (sort != null && order != null) {
+      if (sort == 'price' && order == 'asc') {
+        sortParam = 'price_asc';
+      } else if (sort == 'price' && order == 'desc') {
+        sortParam = 'price_desc';
+      } else if (sort == 'name') {
+        sortParam = 'name';
+      }
+    }
+
     final params = <String, dynamic>{
       'page': page,
       'limit': limit,
       if (search != null && search.isNotEmpty) 'search': search,
       if (category != null && category.isNotEmpty) 'category': category,
-      if (sort != null) 'sort': sort,
-      if (order != null) 'order': order,
+      if (sortParam != null) 'sort': sortParam,
       if (prescriptionRequired != null) 'prescription_required': prescriptionRequired,
     };
     final res = await _client.get('/products', params: params);
@@ -64,19 +75,38 @@ class ApiService {
 
   Future<ProductModel> getProduct(String slug) async {
     final res = await _client.get('/products/$slug');
-    return ProductModel.fromJson(res.data['product'] ?? res.data);
+    // Backend returns the product object directly (not wrapped)
+    final data = res.data;
+    final productMap = (data is Map<String, dynamic> && data.containsKey('product'))
+        ? data['product'] as Map<String, dynamic>
+        : data as Map<String, dynamic>;
+    return ProductModel.fromJson(productMap);
   }
 
   Future<List<ProductModel>> getFeaturedProducts() async {
     final res = await _client.get('/products/featured');
-    final list = res.data['products'] as List<dynamic>? ?? res.data as List<dynamic>? ?? [];
+    // Backend returns plain array directly
+    final data = res.data;
+    List<dynamic> list = [];
+    if (data is List) {
+      list = data;
+    } else if (data is Map) {
+      list = (data['products'] ?? data['data'] ?? []) as List<dynamic>;
+    }
     return list.map((e) => ProductModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   // ── Categories ────────────────────────────────────────────────────────────
   Future<List<CategoryModel>> getCategories() async {
     final res = await _client.get('/categories');
-    final list = res.data['categories'] as List<dynamic>? ?? res.data as List<dynamic>? ?? [];
+    // Backend returns plain array directly
+    final data = res.data;
+    List<dynamic> list = [];
+    if (data is List) {
+      list = data;
+    } else if (data is Map) {
+      list = (data['categories'] ?? data['data'] ?? []) as List<dynamic>;
+    }
     return list.map((e) => CategoryModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 

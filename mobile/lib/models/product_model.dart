@@ -61,9 +61,16 @@ class ProductModel {
   }
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
-    final imagesList = (json['images'] as List<dynamic>? ?? [])
-        .map((e) => ProductImage.fromJson(e as Map<String, dynamic>))
-        .toList();
+    // Backend returns images as plain strings OR as {image_path, sort_order} objects
+    final rawImages = json['images'] as List<dynamic>? ?? [];
+    final imagesList = rawImages.map((e) {
+      if (e is String) {
+        return ProductImage(id: 0, imagePath: e, sortOrder: 0);
+      } else if (e is Map<String, dynamic>) {
+        return ProductImage.fromJson(e);
+      }
+      return ProductImage(id: 0, imagePath: e.toString(), sortOrder: 0);
+    }).toList();
 
     return ProductModel(
       id: json['id'] ?? 0,
@@ -74,13 +81,13 @@ class ProductModel {
       mrp: json['mrp'] != null ? _toDouble(json['mrp']) : null,
       stock: json['stock'] ?? 0,
       categoryId: json['category_id'],
-      categoryName: json['category_name'],
+      categoryName: json['category_name'] ?? json['category'],
       composition: json['composition'],
       manufacturer: json['manufacturer'],
       expiryDate: json['expiry_date'],
       prescriptionRequired: json['prescription_required'] == true || json['prescription_required'] == 1,
       image: json['image'],
-      isActive: json['is_active'] == true || json['is_active'] == 1,
+      isActive: json['is_active'] == true || json['is_active'] == 1 || json['is_active'] == null,
       createdAt: json['created_at'],
       images: imagesList,
     );
