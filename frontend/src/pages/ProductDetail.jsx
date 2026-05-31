@@ -16,6 +16,8 @@ export default function ProductDetail() {
   const [expanded, setExpanded]   = useState(false);
   const [zoomed, setZoomed]       = useState(false);
   const [zoomPos, setZoomPos]     = useState({ x: 50, y: 50 });
+  const [lightbox, setLightbox]   = useState(false);
+  const [lbScale, setLbScale]     = useState(1);
   const imgRef = useRef(null);
   const addItem = useCartStore(s => s.addItem);
 
@@ -111,13 +113,22 @@ export default function ProductDetail() {
                   />
                 </AnimatePresence>
 
+                {/* Fullscreen button */}
+                <button onClick={() => { setLightbox(true); setLbScale(1); }}
+                  className="absolute top-3 right-3 z-10 w-9 h-9 bg-black/50 hover:bg-black/70 text-white rounded-xl flex items-center justify-center transition-colors"
+                  title="Click to zoom / fullscreen">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                  </svg>
+                </button>
+
                 {/* Zoom hint */}
                 {!zoomed && (
                   <div className="absolute bottom-3 right-3 bg-black/50 text-white text-[10px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 pointer-events-none">
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
                     </svg>
-                    Hover to Zoom
+                    Hover to zoom · Click ⛶ for fullscreen
                   </div>
                 )}
 
@@ -163,7 +174,7 @@ export default function ProductDetail() {
 
             {/* ── Right: Info ── */}
             <div className="flex flex-col gap-4">
-              {product.prescription_required && (
+              {!!product.prescription_required && (
                 <span className="badge-rx self-start">Prescription Required (Rx)</span>
               )}
 
@@ -284,6 +295,82 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
+
+      {/* ── Fullscreen Lightbox with zoom ── */}
+      <AnimatePresence>
+        {lightbox && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/95 flex flex-col"
+            onClick={() => setLightbox(false)}>
+
+            {/* Top bar */}
+            <div className="flex items-center justify-between px-4 py-3 shrink-0" onClick={e => e.stopPropagation()}>
+              <p className="text-white text-sm font-semibold truncate max-w-xs">{product.name}</p>
+              <div className="flex items-center gap-2">
+                {/* Zoom out */}
+                <button onClick={() => setLbScale(s => Math.max(1, +(s - 0.5).toFixed(1)))}
+                  className="w-9 h-9 bg-white/15 hover:bg-white/25 rounded-xl flex items-center justify-center text-white transition-colors text-lg font-bold">
+                  −
+                </button>
+                {/* Scale indicator */}
+                <span className="text-white text-xs font-bold w-12 text-center">{Math.round(lbScale * 100)}%</span>
+                {/* Zoom in */}
+                <button onClick={() => setLbScale(s => Math.min(5, +(s + 0.5).toFixed(1)))}
+                  className="w-9 h-9 bg-white/15 hover:bg-white/25 rounded-xl flex items-center justify-center text-white transition-colors text-lg font-bold">
+                  +
+                </button>
+                {/* Reset */}
+                <button onClick={() => setLbScale(1)}
+                  className="px-3 h-9 bg-white/15 hover:bg-white/25 rounded-xl text-white text-xs font-bold transition-colors">
+                  Reset
+                </button>
+                {/* Close */}
+                <button onClick={() => setLightbox(false)}
+                  className="w-9 h-9 bg-red-500/80 hover:bg-red-500 rounded-xl flex items-center justify-center text-white transition-colors">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Image area — scrollable when zoomed */}
+            <div className="flex-1 overflow-auto flex items-center justify-center p-4"
+              onClick={e => e.stopPropagation()}>
+              <motion.img
+                src={images[activeImg]}
+                alt={product.name}
+                animate={{ scale: lbScale }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className="max-w-full max-h-full object-contain select-none"
+                style={{ transformOrigin: 'center center', cursor: lbScale > 1 ? 'grab' : 'zoom-in' }}
+                onClick={() => setLbScale(s => s < 3 ? +(s + 0.5).toFixed(1) : 1)}
+                onError={e => { e.target.src = '/placeholder.webp'; }}
+                draggable={false}
+              />
+            </div>
+
+            {/* Bottom thumbnails */}
+            {images.length > 1 && (
+              <div className="flex items-center justify-center gap-2 px-4 py-3 shrink-0" onClick={e => e.stopPropagation()}>
+                {images.map((img, i) => (
+                  <button key={i} onClick={() => { setActiveImg(i); setLbScale(1); }}
+                    className={`w-14 h-14 rounded-xl overflow-hidden border-2 transition-all ${activeImg === i ? 'border-white' : 'border-white/30 opacity-60 hover:opacity-100'}`}>
+                    <img src={img} alt={i} className="w-full h-full object-contain bg-white p-1"
+                      onError={e => { e.target.src = '/placeholder.webp'; }}/>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Hint */}
+            <p className="text-white/40 text-xs text-center pb-3 shrink-0">
+              Click image to zoom · Use + / − buttons · Click outside to close
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

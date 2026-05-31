@@ -1,0 +1,138 @@
+import 'package:dio/dio.dart';
+import '../core/api_client.dart';
+import '../models/user_model.dart';
+import '../models/product_model.dart';
+import '../models/category_model.dart';
+import '../models/order_model.dart';
+import '../models/offer_model.dart';
+
+class ApiService {
+  final _client = ApiClient.instance;
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  Future<Map<String, dynamic>> sendOtp(String email) async {
+    final res = await _client.post('/auth/login/send-otp', data: {'email': email});
+    return res.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> verifyOtp(String email, String otp) async {
+    final res = await _client.post('/auth/login/verify-otp', data: {'email': email, 'otp': otp});
+    return res.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> register(Map<String, dynamic> data) async {
+    final res = await _client.post('/auth/register', data: data);
+    return res.data as Map<String, dynamic>;
+  }
+
+  Future<UserModel> getMe() async {
+    final res = await _client.get('/auth/me');
+    return UserModel.fromJson(res.data['user'] ?? res.data);
+  }
+
+  // ── Products ──────────────────────────────────────────────────────────────
+  Future<Map<String, dynamic>> getProducts({
+    int page = 1,
+    int limit = 12,
+    String? search,
+    String? category,
+    String? sort,
+    String? order,
+    bool? prescriptionRequired,
+  }) async {
+    final params = <String, dynamic>{
+      'page': page,
+      'limit': limit,
+      if (search != null && search.isNotEmpty) 'search': search,
+      if (category != null && category.isNotEmpty) 'category': category,
+      if (sort != null) 'sort': sort,
+      if (order != null) 'order': order,
+      if (prescriptionRequired != null) 'prescription_required': prescriptionRequired,
+    };
+    final res = await _client.get('/products', params: params);
+    final data = res.data;
+    final products = (data['products'] as List<dynamic>? ?? [])
+        .map((e) => ProductModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return {
+      'products': products,
+      'total': data['total'] ?? 0,
+      'pages': data['pages'] ?? 1,
+      'page': data['page'] ?? 1,
+    };
+  }
+
+  Future<ProductModel> getProduct(String slug) async {
+    final res = await _client.get('/products/$slug');
+    return ProductModel.fromJson(res.data['product'] ?? res.data);
+  }
+
+  Future<List<ProductModel>> getFeaturedProducts() async {
+    final res = await _client.get('/products/featured');
+    final list = res.data['products'] as List<dynamic>? ?? res.data as List<dynamic>? ?? [];
+    return list.map((e) => ProductModel.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  // ── Categories ────────────────────────────────────────────────────────────
+  Future<List<CategoryModel>> getCategories() async {
+    final res = await _client.get('/categories');
+    final list = res.data['categories'] as List<dynamic>? ?? res.data as List<dynamic>? ?? [];
+    return list.map((e) => CategoryModel.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  // ── Offers ────────────────────────────────────────────────────────────────
+  Future<List<OfferModel>> getOffers() async {
+    final res = await _client.get('/offers');
+    final list = res.data['offers'] as List<dynamic>? ?? res.data as List<dynamic>? ?? [];
+    return list.map((e) => OfferModel.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  // ── Cart Validation ───────────────────────────────────────────────────────
+  Future<Map<String, dynamic>> validateCart(List<Map<String, dynamic>> items) async {
+    final res = await _client.post('/cart/validate', data: {'items': items});
+    return res.data as Map<String, dynamic>;
+  }
+
+  // ── Orders ────────────────────────────────────────────────────────────────
+  Future<OrderModel> createOrder(Map<String, dynamic> data) async {
+    final res = await _client.post('/orders', data: data);
+    return OrderModel.fromJson(res.data['order'] ?? res.data);
+  }
+
+  Future<List<OrderModel>> getOrders() async {
+    final res = await _client.get('/orders');
+    final list = res.data['orders'] as List<dynamic>? ?? res.data as List<dynamic>? ?? [];
+    return list.map((e) => OrderModel.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<OrderModel> getOrder(int id) async {
+    final res = await _client.get('/orders/$id');
+    return OrderModel.fromJson(res.data['order'] ?? res.data);
+  }
+
+  // ── Payment ───────────────────────────────────────────────────────────────
+  Future<Map<String, dynamic>> createPaymentOrder(Map<String, dynamic> data) async {
+    final res = await _client.post('/payment/create-order', data: data);
+    return res.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> verifyPayment(Map<String, dynamic> data) async {
+    final res = await _client.post('/payment/verify', data: data);
+    return res.data as Map<String, dynamic>;
+  }
+
+  // ── Prescription ──────────────────────────────────────────────────────────
+  Future<Map<String, dynamic>> extractPrescription(String filePath) async {
+    final formData = FormData.fromMap({
+      'prescription': await MultipartFile.fromFile(filePath, filename: 'prescription.jpg'),
+    });
+    final res = await _client.postFormData('/prescription/extract', formData);
+    return res.data as Map<String, dynamic>;
+  }
+
+  // ── Consultation ──────────────────────────────────────────────────────────
+  Future<Map<String, dynamic>> bookConsultation(Map<String, dynamic> data) async {
+    final res = await _client.post('/consultation/gynecologist', data: data);
+    return res.data as Map<String, dynamic>;
+  }
+}

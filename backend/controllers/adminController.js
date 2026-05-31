@@ -140,14 +140,132 @@ exports.getAllUsers = async (req, res) => {
 };
 
 // Categories
-exports.createCategory = async (req, res) => {
-  const { name, slug } = req.body;
+exports.getAllCategories = async (req, res) => {
   try {
-    const [result] = await db.query('INSERT INTO categories (name, slug) VALUES (?, ?)', [name, slug]);
-    res.status(201).json({ id: result.insertId });
+    const [cats] = await db.query(
+      `SELECT c.*, COUNT(p.id) as product_count
+       FROM categories c
+       LEFT JOIN products p ON p.category_id = c.id AND p.is_active = 1
+       GROUP BY c.id ORDER BY c.name ASC`
+    );
+    res.json(cats);
+  } catch {
+    res.status(500).json({ message: 'Failed to fetch categories' });
+  }
+};
+
+exports.createCategory = async (req, res) => {
+  const { name, slug, image } = req.body;
+  if (!name?.trim() || !slug?.trim()) return res.status(400).json({ message: 'Name and slug are required' });
+  try {
+    const [result] = await db.query('INSERT INTO categories (name, slug, image) VALUES (?, ?, ?)', [name.trim(), slug.trim(), image || null]);
+    res.status(201).json({ id: result.insertId, message: 'Category created' });
   } catch (err) {
-    if (err.code === 'ER_DUP_ENTRY') return res.status(409).json({ message: 'Slug exists' });
+    if (err.code === 'ER_DUP_ENTRY') return res.status(409).json({ message: 'Slug already exists' });
     res.status(500).json({ message: 'Failed to create category' });
+  }
+};
+
+exports.updateCategory = async (req, res) => {
+  const { name, slug, image } = req.body;
+  if (!name?.trim() || !slug?.trim()) return res.status(400).json({ message: 'Name and slug are required' });
+  const fields = ['name = ?', 'slug = ?'];
+  const values = [name.trim(), slug.trim()];
+  if (image !== undefined) { fields.push('image = ?'); values.push(image || null); }
+  try {
+    await db.query(`UPDATE categories SET ${fields.join(', ')} WHERE id = ?`, [...values, req.params.id]);
+    res.json({ message: 'Category updated' });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') return res.status(409).json({ message: 'Slug already exists' });
+    res.status(500).json({ message: 'Failed to update category' });
+  }
+};
+
+exports.deleteCategory = async (req, res) => {
+  try {
+    const [[{ cnt }]] = await db.query('SELECT COUNT(*) as cnt FROM products WHERE category_id = ? AND is_active = 1', [req.params.id]);
+    if (cnt > 0) return res.status(409).json({ message: `Cannot delete — ${cnt} active product(s) use this category` });
+    await db.query('DELETE FROM categories WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Category deleted' });
+  } catch {
+    res.status(500).json({ message: 'Failed to delete category' });
+  }
+};
+
+// Product Gallery Images
+exports.getProductImages = async (req, res) => {
+  try {
+    const [images] = await db.query(
+      'SELECT id, image_path, sort_order FROM product_images WHERE product_id = ? ORDER BY sort_order ASC',
+      [req.params.id]
+    );
+    res.json({ images });
+  } catch {
+    res.status(500).json({ message: 'Failed to fetch images' });
+  }
+};
+
+exports.addProductImage = async (req, res) => {
+  const { image_path, sort_order } = req.body;
+  if (!image_path || !image_path.startsWith('data:image/')) {
+    return res.status(400).json({ message: 'Valid base64 image required' });
+  }
+  try {
+    const [[{ maxOrder }]] = await db.query(
+      'SELECT COALESCE(MAX(sort_order), 0) as maxOrder FROM product_images WHERE product_id = ?',
+      [req.params.id]
+    );
+    const order = sort_order ?? (maxOrder + 1);
+    const [result] = await db.query(
+      'INSERT INTO product_images (product_id, image_path, sort_order) VALUES (?, ?, ?)',
+      [req.params.id, image_path, order]
+    );
+    // Also update main product image if this is the first image
+    await db.query(
+      'UPDATE products SET image = ? WHERE id = ? AND (image IS NULL OR image = "")',
+      [image_path, req.params.id]
+    );
+    res.status(201).json({ id: result.insertId, message: 'Image added' });
+  } catch {
+    res.status(500).json({ message: 'Failed to add image' });
+  }
+};
+
+exports.deleteProductImage = async (req, res) => {
+  try {
+    await db.query('DELETE FROM product_images WHERE id = ? AND product_id = ?', [req.params.imgId, req.params.id]);
+    // If deleted image was the main product image, update it to next available gallery image
+    const [[product]] = await db.query('SELECT image FROM products WHERE id = ?', [req.params.id]);
+    const [[firstGallery]] = await db.query(
+      'SELECT image_path FROM product_images WHERE product_id = ? ORDER BY sort_order ASC LIMIT 1',
+      [req.params.id]
+    );
+    if (firstGallery) {
+      await db.query('UPDATE products SET image = ? WHERE id = ?', [firstGallery.image_path, req.params.id]);
+    }
+    res.json({ message: 'Image deleted' });
+  } catch {
+    res.status(500).json({ message: 'Failed to delete image' });
+  }
+};
+
+exports.reorderProductImages = async (req, res) => {
+  // req.body.order = [{ id, sort_order }, ...]
+  const { order } = req.body;
+  if (!Array.isArray(order)) return res.status(400).json({ message: 'order array required' });
+  try {
+    await Promise.all(order.map(({ id, sort_order }) =>
+      db.query('UPDATE product_images SET sort_order = ? WHERE id = ? AND product_id = ?', [sort_order, id, req.params.id])
+    ));
+    // Update main product image to new first image
+    const [[first]] = await db.query(
+      'SELECT image_path FROM product_images WHERE product_id = ? ORDER BY sort_order ASC LIMIT 1',
+      [req.params.id]
+    );
+    if (first) await db.query('UPDATE products SET image = ? WHERE id = ?', [first.image_path, req.params.id]);
+    res.json({ message: 'Images reordered' });
+  } catch {
+    res.status(500).json({ message: 'Failed to reorder images' });
   }
 };
 

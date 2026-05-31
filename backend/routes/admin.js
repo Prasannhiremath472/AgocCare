@@ -22,13 +22,22 @@ router.post('/products',       ctrl.createProduct);
 router.put('/products/:id',    ctrl.updateProduct);
 router.delete('/products/:id', ctrl.deleteProduct);
 
+// Product gallery images
+router.get('/products/:id/images',              ctrl.getProductImages);
+router.post('/products/:id/images',             ctrl.addProductImage);
+router.delete('/products/:id/images/:imgId',    ctrl.deleteProductImage);
+router.put('/products/:id/images/reorder',      ctrl.reorderProductImages);
+
 router.get('/orders',            ctrl.getAllOrders);
 router.get('/orders/:id',        ctrl.getOrderDetail);
 router.put('/orders/:id/status', ctrl.updateOrderStatus);
 
 router.get('/users', ctrl.getAllUsers);
 
-router.post('/categories', ctrl.createCategory);
+router.get('/categories',        ctrl.getAllCategories);
+router.post('/categories',       ctrl.createCategory);
+router.put('/categories/:id',    ctrl.updateCategory);
+router.delete('/categories/:id', ctrl.deleteCategory);
 
 router.post('/bulk-upload', bulkMiddleware, bulk.bulkUpload);
 

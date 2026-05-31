@@ -1,11 +1,185 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { adminGetProducts, adminCreateProduct, adminUpdateProduct, adminDeleteProduct, getCategories } from '../../services/api';
+import {
+  adminGetProducts, adminCreateProduct, adminUpdateProduct, adminDeleteProduct, getCategories,
+  adminGetProductImages, adminAddProductImage, adminDeleteProductImage, adminReorderProductImages,
+} from '../../services/api';
 import { formatPrice, imgUrl } from '../../utils/helpers';
 import toast from 'react-hot-toast';
 
-const EMPTY = { name:'', slug:'', description:'', price:'', mrp:'', stock:'', category_id:'', composition:'', manufacturer:'', expiry_date:'', prescription_required: false };
+const EMPTY = {
+  name:'', slug:'', description:'', price:'', mrp:'', stock:'',
+  category_id:'', composition:'', manufacturer:'', expiry_date:'',
+  prescription_required: false,
+};
 
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB per image
+
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── Gallery Manager Component ───────────────────────────────────────────────
+function GalleryManager({ productId }) {
+  const [images, setImages]     = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [uploading, setUploading] = useState(false);
+
+  const fetchImages = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data } = await adminGetProductImages(productId);
+      setImages(data.images || []);
+    } catch { toast.error('Failed to load gallery'); }
+    setLoading(false);
+  }, [productId]);
+
+  useEffect(() => { fetchImages(); }, [fetchImages]);
+
+  const handleFiles = async (files) => {
+    const valid = Array.from(files).filter(f => {
+      if (f.size > MAX_IMAGE_SIZE) { toast.error(`${f.name} exceeds 5 MB`); return false; }
+      return true;
+    });
+    if (!valid.length) return;
+    setUploading(true);
+    for (const file of valid) {
+      try {
+        const b64 = await toBase64(file);
+        await adminAddProductImage(productId, { image_path: b64, sort_order: images.length + 1 });
+      } catch { toast.error(`Failed to upload ${file.name}`); }
+    }
+    await fetchImages();
+    toast.success(`${valid.length} image(s) added`);
+    setUploading(false);
+  };
+
+  const handleDelete = async (imgId) => {
+    if (!confirm('Remove this image?')) return;
+    try {
+      await adminDeleteProductImage(productId, imgId);
+      setImages(prev => prev.filter(i => i.id !== imgId));
+      toast.success('Image removed');
+    } catch { toast.error('Failed to remove image'); }
+  };
+
+  const moveImage = async (index, direction) => {
+    const newImages = [...images];
+    const swapIdx = index + direction;
+    if (swapIdx < 0 || swapIdx >= newImages.length) return;
+    [newImages[index], newImages[swapIdx]] = [newImages[swapIdx], newImages[index]];
+    const order = newImages.map((img, i) => ({ id: img.id, sort_order: i + 1 }));
+    setImages(newImages);
+    try {
+      await adminReorderProductImages(productId, order);
+    } catch { toast.error('Failed to reorder'); fetchImages(); }
+  };
+
+  return (
+    <div className="space-y-3">
+      {/* Upload dropzone */}
+      <div
+        onDragOver={e => e.preventDefault()}
+        onDrop={e => { e.preventDefault(); handleFiles(e.dataTransfer.files); }}
+        onClick={() => document.getElementById(`gallery-input-${productId}`).click()}
+        className="border-2 border-dashed border-gray-200 hover:border-primary rounded-xl p-4 text-center cursor-pointer transition-colors group"
+      >
+        <input
+          id={`gallery-input-${productId}`}
+          type="file" accept="image/*" multiple className="hidden"
+          onChange={e => handleFiles(e.target.files)}
+        />
+        {uploading ? (
+          <div className="flex items-center justify-center gap-2 text-primary">
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+              className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full"/>
+            <span className="text-sm font-semibold">Uploading…</span>
+          </div>
+        ) : (
+          <div className="text-gray-400 group-hover:text-primary transition-colors">
+            <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <p className="text-sm font-semibold">Click or drag & drop images here</p>
+            <p className="text-xs mt-0.5">JPG, PNG · Max 5 MB each · Multiple files supported</p>
+          </div>
+        )}
+      </div>
+
+      {/* Image grid */}
+      {loading ? (
+        <div className="grid grid-cols-4 gap-2">
+          {[1,2,3,4].map(i => <div key={i} className="aspect-square bg-gray-100 rounded-xl animate-pulse"/>)}
+        </div>
+      ) : images.length === 0 ? (
+        <p className="text-xs text-center text-gray-400 py-2">No gallery images yet. Upload above.</p>
+      ) : (
+        <div className="grid grid-cols-4 gap-2">
+          {images.map((img, idx) => (
+            <div key={img.id} className="relative group aspect-square">
+              <img
+                src={img.image_path}
+                alt={`Gallery ${idx + 1}`}
+                className="w-full h-full object-cover rounded-xl border border-gray-200"
+              />
+              {/* Position badge */}
+              <div className="absolute top-1 left-1 bg-black/60 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                {idx === 0 ? '★ Main' : `#${idx + 1}`}
+              </div>
+              {/* Controls overlay */}
+              <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5">
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => moveImage(idx, -1)}
+                    disabled={idx === 0}
+                    className="bg-white/90 hover:bg-white text-gray-700 disabled:opacity-30 w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+                    title="Move left"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7"/>
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveImage(idx, 1)}
+                    disabled={idx === images.length - 1}
+                    className="bg-white/90 hover:bg-white text-gray-700 disabled:opacity-30 w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+                    title="Move right"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(img.id)}
+                  className="bg-red-500 hover:bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {images.length > 0 && (
+        <p className="text-[10px] text-gray-400">
+          First image (★ Main) is shown as the product thumbnail. Hover to reorder or remove.
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── Main Component ──────────────────────────────────────────────────────────
 export default function AdminProducts() {
   const [products, setProducts]     = useState([]);
   const [categories, setCategories] = useState([]);
@@ -16,11 +190,12 @@ export default function AdminProducts() {
   const [showForm, setShowForm]     = useState(false);
   const [editing, setEditing]       = useState(null);
   const [form, setForm]             = useState(EMPTY);
-  const [image, setImage]           = useState(null);
+  const [mainImage, setMainImage]   = useState(null); // File for main image
   const [saving, setSaving]         = useState(false);
   const [search, setSearch]         = useState('');
+  const [activeTab, setActiveTab]   = useState('details'); // 'details' | 'gallery'
 
-  const fetch = async () => {
+  const fetchProducts = async () => {
     setLoading(true);
     try {
       const { data } = await adminGetProducts({ page });
@@ -29,42 +204,57 @@ export default function AdminProducts() {
     setLoading(false);
   };
 
-  useEffect(() => { fetch(); }, [page]);
+  useEffect(() => { fetchProducts(); }, [page]);
   useEffect(() => { getCategories().then(r => setCategories(r.data)); }, []);
 
-  const openAdd  = () => { setForm(EMPTY); setEditing(null); setImage(null); setShowForm(true); };
-  const openEdit = p => { setForm({ ...p, expiry_date: p.expiry_date?.split('T')[0] || '' }); setEditing(p.id); setImage(null); setShowForm(true); };
+  const openAdd = () => {
+    setForm(EMPTY); setEditing(null); setMainImage(null);
+    setActiveTab('details'); setShowForm(true);
+  };
+
+  const openEdit = p => {
+    setForm({ ...p, expiry_date: p.expiry_date?.split('T')[0] || '' });
+    setEditing(p.id); setMainImage(null);
+    setActiveTab('details'); setShowForm(true);
+  };
 
   const handleChange = e => {
     const { name, value, type, checked } = e.target;
     setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  const toBase64 = file => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result); // returns "data:image/jpeg;base64,..."
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-
   const handleSubmit = async e => {
     e.preventDefault(); setSaving(true);
     try {
       const payload = { ...form };
-      // convert empty strings to null for nullable fields
       ['mrp','composition','manufacturer','expiry_date','description'].forEach(k => {
         if (payload[k] === '') payload[k] = null;
       });
-      if (image) {
-        payload.image = await toBase64(image); // new image selected → convert to base64
+      if (mainImage) {
+        payload.image = await toBase64(mainImage);
       } else if (!form.image) {
-        payload.image = null;                  // admin removed existing image
+        payload.image = null;
       } else {
-        delete payload.image;                  // no change → don't overwrite DB image
+        delete payload.image;
       }
-      editing ? await adminUpdateProduct(editing, payload) : await adminCreateProduct(payload);
-      toast.success(editing ? 'Product updated!' : 'Product created!');
-      setShowForm(false); fetch();
+      if (editing) {
+        await adminUpdateProduct(editing, payload);
+        toast.success('Product updated!');
+        // Switch to gallery tab for adding images
+        setActiveTab('gallery');
+        setSaving(false);
+        fetchProducts();
+        return;
+      } else {
+        const { data } = await adminCreateProduct(payload);
+        toast.success('Product created! Now add gallery images.');
+        setEditing(data.id);
+        setForm(f => ({ ...f, id: data.id }));
+        setActiveTab('gallery');
+        setSaving(false);
+        fetchProducts();
+        return;
+      }
     } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
     setSaving(false);
   };
@@ -73,7 +263,7 @@ export default function AdminProducts() {
     if (!confirm('Deactivate this product?')) return;
     await adminDeleteProduct(id).catch(() => {});
     toast.success('Product deactivated');
-    fetch();
+    fetchProducts();
   };
 
   const filtered = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
@@ -141,9 +331,16 @@ export default function AdminProducts() {
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-teal-light border border-teal-mid/30 overflow-hidden flex items-center justify-center shrink-0">
-                        <img src={imgUrl(p.image)} alt={p.name}
-                          className="w-full h-full object-contain p-1"
-                          onError={e => { e.target.src = '/placeholder.webp'; }}/>
+                        {p.image ? (
+                          <img src={p.image.startsWith('data:') ? p.image : imgUrl(p.image)}
+                            alt={p.name} className="w-full h-full object-contain p-1"
+                            onError={e => { e.target.style.display='none'; }}/>
+                        ) : (
+                          <svg className="w-5 h-5 text-teal/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                          </svg>
+                        )}
                       </div>
                       <div>
                         <p className="font-semibold text-teal line-clamp-1 max-w-[160px]">{p.name}</p>
@@ -218,10 +415,10 @@ export default function AdminProducts() {
               className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl"
             >
               {/* Modal header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-teal-light rounded-t-2xl">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-teal-light rounded-t-2xl sticky top-0 z-10">
                 <div>
-                  <h2 className="font-black text-teal text-lg">{editing ? '✏️ Edit Product' : '➕ Add New Product'}</h2>
-                  <p className="text-xs text-gray-400 mt-0.5">{editing ? 'Update product details' : 'Fill in the product information'}</p>
+                  <h2 className="font-black text-teal text-lg">{editing ? 'Edit Product' : 'Add New Product'}</h2>
+                  <p className="text-xs text-gray-400 mt-0.5">{editing ? 'Update product details and manage gallery' : 'Fill in product info, then add gallery images'}</p>
                 </div>
                 <motion.button onClick={() => setShowForm(false)}
                   whileHover={{ scale:1.1, rotate:90 }} whileTap={{ scale:0.9 }}
@@ -232,138 +429,168 @@ export default function AdminProducts() {
                 </motion.button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  {[['name','Product Name *','text',true],['slug','URL Slug *','text',true],
-                    ['price','Selling Price (₹) *','number',true],['mrp','MRP (₹)','number',false],
-                    ['stock','Stock Qty *','number',true],['manufacturer','Manufacturer','text',false],
-                    ['composition','Composition / Salt','text',false]].map(([n,l,t,r]) => (
-                    <div key={n} className={n === 'composition' || n === 'manufacturer' ? 'col-span-2 sm:col-span-1' : ''}>
-                      <label className="block text-[11px] font-black text-gray-500 mb-1.5 uppercase tracking-wider">{l}</label>
-                      <input name={n} type={t} step={t==='number'?'0.01':undefined}
-                        value={form[n]} onChange={handleChange} required={r}
-                        className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-teal bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"/>
+              {/* Tabs */}
+              <div className="flex border-b border-gray-100 px-6 bg-white">
+                {[
+                  { id: 'details', label: 'Product Details', icon: '📋' },
+                  { id: 'gallery', label: 'Gallery Images', icon: '🖼️', disabled: !editing },
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => !tab.disabled && setActiveTab(tab.id)}
+                    disabled={tab.disabled}
+                    className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors relative ${
+                      activeTab === tab.id
+                        ? 'border-primary text-primary'
+                        : tab.disabled
+                          ? 'border-transparent text-gray-300 cursor-not-allowed'
+                          : 'border-transparent text-gray-500 hover:text-teal hover:border-gray-200'
+                    }`}
+                  >
+                    {tab.icon} {tab.label}
+                    {tab.disabled && <span className="text-[10px] ml-1 text-gray-300">(save first)</span>}
+                  </button>
+                ))}
+              </div>
+
+              {/* Tab: Details */}
+              {activeTab === 'details' && (
+                <form onSubmit={handleSubmit} className="p-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      ['name','Product Name *','text',true],
+                      ['slug','URL Slug *','text',true],
+                      ['price','Selling Price (₹) *','number',true],
+                      ['mrp','MRP (₹)','number',false],
+                      ['stock','Stock Qty *','number',true],
+                      ['manufacturer','Manufacturer','text',false],
+                      ['composition','Composition / Salt','text',false],
+                    ].map(([n,l,t,r]) => (
+                      <div key={n} className={n === 'composition' || n === 'manufacturer' ? 'col-span-2 sm:col-span-1' : ''}>
+                        <label className="block text-[11px] font-black text-gray-500 mb-1.5 uppercase tracking-wider">{l}</label>
+                        <input name={n} type={t} step={t==='number'?'0.01':undefined}
+                          value={form[n]} onChange={handleChange} required={r}
+                          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-teal bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"/>
+                      </div>
+                    ))}
+
+                    <div>
+                      <label className="block text-[11px] font-black text-gray-500 mb-1.5 uppercase tracking-wider">Category *</label>
+                      <select name="category_id" value={form.category_id} onChange={handleChange} required
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-teal bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="">Select…</option>
+                        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
                     </div>
-                  ))}
 
-                  <div>
-                    <label className="block text-[11px] font-black text-gray-500 mb-1.5 uppercase tracking-wider">Category *</label>
-                    <select name="category_id" value={form.category_id} onChange={handleChange} required
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-teal bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary">
-                      <option value="">Select…</option>
-                      {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
-                  </div>
+                    <div>
+                      <label className="block text-[11px] font-black text-gray-500 mb-1.5 uppercase tracking-wider">Expiry Date</label>
+                      <input name="expiry_date" type="date" value={form.expiry_date} onChange={handleChange}
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-teal bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary"/>
+                    </div>
 
-                  <div>
-                    <label className="block text-[11px] font-black text-gray-500 mb-1.5 uppercase tracking-wider">Expiry Date</label>
-                    <input name="expiry_date" type="date" value={form.expiry_date} onChange={handleChange}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-teal bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary"/>
-                  </div>
+                    <div className="col-span-2">
+                      <label className="block text-[11px] font-black text-gray-500 mb-1.5 uppercase tracking-wider">Description</label>
+                      <textarea name="description" value={form.description || ''} onChange={handleChange} rows={3}
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-teal bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary resize-none"/>
+                    </div>
 
-                  <div className="col-span-2">
-                    <label className="block text-[11px] font-black text-gray-500 mb-1.5 uppercase tracking-wider">Description</label>
-                    <textarea name="description" value={form.description} onChange={handleChange} rows={3}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-teal bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary resize-none"/>
-                  </div>
+                    <div className="flex items-center gap-3 py-1">
+                      <input type="checkbox" name="prescription_required" id="rx"
+                        checked={form.prescription_required} onChange={handleChange}
+                        className="w-4 h-4 accent-primary cursor-pointer"/>
+                      <label htmlFor="rx" className="text-sm font-semibold text-teal cursor-pointer">Prescription Required (Rx)</label>
+                    </div>
 
-                  <div className="flex items-center gap-3 py-1">
-                    <input type="checkbox" name="prescription_required" id="rx"
-                      checked={form.prescription_required} onChange={handleChange}
-                      className="w-4 h-4 accent-primary cursor-pointer"/>
-                    <label htmlFor="rx" className="text-sm font-semibold text-teal cursor-pointer">Prescription Required (Rx)</label>
-                  </div>
-
-                  <div className="col-span-2">
-                    <label className="block text-[11px] font-black text-gray-500 mb-1.5 uppercase tracking-wider">Product Image</label>
-
-                    {/* Show existing DB image when editing and no new image selected */}
-                    {editing && form.image && !image && (() => {
-                      const isBase64 = form.image.startsWith('data:image');
-                      return (
-                        <div className={`flex items-center gap-4 rounded-xl px-4 py-3 mb-2 border ${isBase64 ? 'bg-gray-50 border-gray-200' : 'bg-amber-50 border-amber-200'}`}>
-                          {isBase64 ? (
-                            <img src={form.image} alt="Current"
-                              className="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0"/>
-                          ) : (
-                            <div className="w-16 h-16 rounded-lg border border-amber-200 bg-amber-100 flex items-center justify-center text-2xl shrink-0">
-                              🖼️
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            {isBase64 ? (
-                              <>
-                                <p className="text-xs font-bold text-teal">Current Image</p>
-                                <p className="text-xs text-gray-400 mt-0.5">Select a new image below to replace it</p>
-                              </>
-                            ) : (
-                              <>
-                                <p className="text-xs font-bold text-amber-700">Old image path (file may not load)</p>
-                                <p className="text-xs text-amber-600 mt-0.5 truncate font-mono">{form.image}</p>
-                                <p className="text-xs text-amber-500 mt-0.5">Upload a new image below to replace it</p>
-                              </>
-                            )}
+                    {/* Main product image */}
+                    <div className="col-span-2">
+                      <label className="block text-[11px] font-black text-gray-500 mb-1.5 uppercase tracking-wider">
+                        Main Product Image
+                        <span className="ml-1 font-normal text-gray-400 normal-case">(also manageable from Gallery tab)</span>
+                      </label>
+                      {editing && form.image && !mainImage && (
+                        <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-2">
+                          <img src={form.image.startsWith('data:') ? form.image : imgUrl(form.image)}
+                            alt="Current" className="w-14 h-14 object-contain rounded-lg border border-gray-200 bg-white shrink-0"/>
+                          <div className="flex-1">
+                            <p className="text-xs font-bold text-teal">Current Main Image</p>
+                            <p className="text-xs text-gray-400 mt-0.5">Upload a new image to replace, or manage all images in Gallery tab</p>
                           </div>
-                          <button type="button"
-                            onClick={() => setForm(f => ({ ...f, image: null }))}
+                          <button type="button" onClick={() => setForm(f => ({ ...f, image: null }))}
                             className="text-xs font-bold text-red-500 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-colors shrink-0">
                             Remove
                           </button>
                         </div>
-                      );
-                    })()}
-
-                    <div
-                      onClick={() => document.getElementById('img-input').click()}
-                      className="border-2 border-dashed border-gray-200 hover:border-primary rounded-xl p-5 text-center cursor-pointer transition-colors group">
-                      <input id="img-input" type="file" accept="image/*"
-                        onChange={e => {
-                          const file = e.target.files[0];
-                          if (!file) return;
-                          if (file.size > 2 * 1024 * 1024) {
-                            toast.error('Image must be 2 MB or smaller');
-                            e.target.value = '';
-                            return;
-                          }
-                          setImage(file);
-                        }} className="hidden"/>
-                      {image ? (
-                        <div className="flex items-center justify-center gap-3">
-                          <img src={URL.createObjectURL(image)} alt="Preview"
-                            className="w-14 h-14 object-contain rounded-lg border border-gray-200"/>
-                          <div className="text-left">
-                            <p className="text-sm font-semibold text-primary">{image.name}</p>
-                            <p className="text-xs text-gray-400">{(image.size / 1024).toFixed(0)} KB · Click to change</p>
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-400 group-hover:text-primary transition-colors">
-                          {editing && form.image ? 'Click to replace image (JPG, PNG — max 2 MB)' : 'Click to upload image (JPG, PNG — max 2 MB)'}
-                        </p>
                       )}
+                      <div
+                        onClick={() => document.getElementById('main-img-input').click()}
+                        className="border-2 border-dashed border-gray-200 hover:border-primary rounded-xl p-4 text-center cursor-pointer transition-colors group">
+                        <input id="main-img-input" type="file" accept="image/*"
+                          onChange={e => {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            if (file.size > MAX_IMAGE_SIZE) { toast.error('Image must be 5 MB or smaller'); e.target.value = ''; return; }
+                            setMainImage(file);
+                          }} className="hidden"/>
+                        {mainImage ? (
+                          <div className="flex items-center justify-center gap-3">
+                            <img src={URL.createObjectURL(mainImage)} alt="Preview"
+                              className="w-14 h-14 object-contain rounded-lg border border-gray-200"/>
+                            <div className="text-left">
+                              <p className="text-sm font-semibold text-primary">{mainImage.name}</p>
+                              <p className="text-xs text-gray-400">{(mainImage.size / 1024).toFixed(0)} KB · Click to change</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-400 group-hover:text-primary transition-colors">
+                            Click to upload main image (JPG, PNG — max 5 MB)
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex gap-3 justify-end pt-5 border-t border-gray-100 mt-5">
-                  <motion.button type="button" onClick={() => setShowForm(false)}
-                    whileTap={{ scale:0.97 }}
-                    className="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-sm font-semibold text-gray-600 hover:border-gray-300 transition-colors">
-                    Cancel
-                  </motion.button>
-                  <motion.button type="submit" disabled={saving}
-                    whileHover={saving ? {} : { scale:1.02 }} whileTap={saving ? {} : { scale:0.97 }}
-                    className="btn-primary px-6 py-2.5 text-sm">
-                    {saving ? (
-                      <span className="flex items-center gap-2">
-                        <motion.span animate={{ rotate:360 }} transition={{ duration:0.8, repeat:Infinity, ease:'linear' }}
-                          className="w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block"/>
-                        Saving…
-                      </span>
-                    ) : (editing ? 'Update Product' : 'Create Product')}
-                  </motion.button>
+                  <div className="flex gap-3 justify-end pt-5 border-t border-gray-100 mt-5">
+                    <motion.button type="button" onClick={() => setShowForm(false)}
+                      whileTap={{ scale:0.97 }}
+                      className="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-sm font-semibold text-gray-600 hover:border-gray-300 transition-colors">
+                      Cancel
+                    </motion.button>
+                    <motion.button type="submit" disabled={saving}
+                      whileHover={saving ? {} : { scale:1.02 }} whileTap={saving ? {} : { scale:0.97 }}
+                      className="btn-primary px-6 py-2.5 text-sm">
+                      {saving ? (
+                        <span className="flex items-center gap-2">
+                          <motion.span animate={{ rotate:360 }} transition={{ duration:0.8, repeat:Infinity, ease:'linear' }}
+                            className="w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block"/>
+                          Saving…
+                        </span>
+                      ) : editing ? 'Save & Go to Gallery →' : 'Create & Add Images →'}
+                    </motion.button>
+                  </div>
+                </form>
+              )}
+
+              {/* Tab: Gallery */}
+              {activeTab === 'gallery' && editing && (
+                <div className="p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-teal">Gallery Images</h3>
+                      <p className="text-xs text-gray-400 mt-0.5">Upload multiple images. First image becomes the main product thumbnail.</p>
+                    </div>
+                  </div>
+                  <GalleryManager productId={editing} />
+                  <div className="flex gap-3 justify-end pt-4 border-t border-gray-100">
+                    <motion.button type="button" onClick={() => { setShowForm(false); fetchProducts(); }}
+                      whileTap={{ scale:0.97 }}
+                      className="btn-primary px-6 py-2.5 text-sm">
+                      Done
+                    </motion.button>
+                  </div>
                 </div>
-              </form>
+              )}
             </motion.div>
           </motion.div>
         )}

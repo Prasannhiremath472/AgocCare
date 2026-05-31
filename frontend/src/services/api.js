@@ -47,12 +47,21 @@ export const adminGetProducts = (params) => api.get('/admin/products', { params 
 export const adminCreateProduct = (data) => api.post('/admin/products', data);
 export const adminUpdateProduct = (id, data) => api.put(`/admin/products/${id}`, data);
 export const adminDeleteProduct = (id) => api.delete(`/admin/products/${id}`);
+
+// Product gallery images
+export const adminGetProductImages   = (id)            => api.get(`/admin/products/${id}/images`);
+export const adminAddProductImage    = (id, data)      => api.post(`/admin/products/${id}/images`, data);
+export const adminDeleteProductImage = (id, imgId)     => api.delete(`/admin/products/${id}/images/${imgId}`);
+export const adminReorderProductImages = (id, order)   => api.put(`/admin/products/${id}/images/reorder`, { order });
 export const adminGetOrders = (params) => api.get('/admin/orders', { params });
 export const adminGetOrderDetail = (id) => api.get(`/admin/orders/${id}`);
 export const adminUpdateOrder = (id, data) => api.put(`/admin/orders/${id}/status`, data);
 export const adminGetUsers = () => api.get('/admin/users');
 export const adminDashboard = () => api.get('/admin/dashboard');
-export const adminCreateCategory = (data) => api.post('/admin/categories', data);
+export const adminGetCategories    = ()       => api.get('/admin/categories');
+export const adminCreateCategory   = (data)   => api.post('/admin/categories', data);
+export const adminUpdateCategory   = (id, data) => api.put(`/admin/categories/${id}`, data);
+export const adminDeleteCategory   = (id)     => api.delete(`/admin/categories/${id}`);
 export const adminBulkUpload = (data) => api.post('/admin/bulk-upload', data, {
   headers: { 'Content-Type': 'multipart/form-data' },
   timeout: 120000,
