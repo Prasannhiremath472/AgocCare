@@ -222,18 +222,18 @@ export default function About() {
             <motion.div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
               variants={staggerContainer(0.06)} initial="hidden" whileInView="visible" viewport={viewport}>
               {[
-                { name:'Amit R Medical', area:'Paanch Bangala',  gmb:'https://www.google.com/maps/search/?api=1&query=Amit+R+Medical+Pach+Bangala+Kolhapur' },
-                { name:'Amit R Medical', area:'Rajarampuri',     gmb:'https://www.google.com/maps/search/?api=1&query=16.7011493,74.2411152' },
-                { name:'Amit R Medical', area:'Racecourse Naka', gmb:'https://www.google.com/maps?q=16.6815052,74.2226502' },
-                { name:'Amit R Medical', area:'Station Road',    gmb:'https://www.google.com/maps/search/?api=1&query=Amit+R+Medical+Station+Road+Kolhapur' },
-                { name:'Amit R Medical', area:'Rankala Stand',   gmb:'https://www.google.com/maps/search/?api=1&query=Amit+R+Medical+Rankala+Kolhapur' },
-                { name:'Amit R Medical', area:'Nagala Park',     gmb:'https://www.google.com/maps/search/?api=1&query=Amit+R+Medical+Nagala+Park+Kolhapur' },
-                { name:'Amit R Medical', area:'Kodoli',          gmb:'https://www.google.com/maps/search/?api=1&query=16.8721078,74.1923861' },
-                { name:'Amit R Medical', area:'Khed',            gmb:'https://www.google.com/maps/search/?api=1&query=Amit+R+Medical+Khed+Kolhapur' },
-                { name:'Amit R Medical', area:'Hupari',          gmb:'https://www.google.com/maps/search/?api=1&query=Amit+R+Medical+Hupari+Kolhapur' },
-                { name:'D&C Care Pharmacy',  area:'Gadhinglaj',    gmb:'https://www.google.com/maps/search/?api=1&query=D%26C+Care+Pharmacy+Gadhinglaj+Kolhapur' },
-                { name:'Princess Matching',  area:'Gadhinglaj',    gmb:'https://www.google.com/maps/search/?api=1&query=Princess+Matching+Gadhinglaj+Kolhapur' },
-                { name:'My Baby',            area:'Ghati Darwaja', gmb:'https://www.google.com/maps/search/?api=1&query=My+Baby+Ghati+Darwaja+Kolhapur' },
+                { name:'Amit R Medical',     area:'Paanch Bangala'  },
+                { name:'Amit R Medical',     area:'Rajarampuri'     },
+                { name:'Amit R Medical',     area:'Racecourse Naka' },
+                { name:'Amit R Medical',     area:'Station Road'    },
+                { name:'Amit R Medical',     area:'Rankala Stand'   },
+                { name:'Amit R Medical',     area:'Nagala Park'     },
+                { name:'Amit R Medical',     area:'Kodoli'          },
+                { name:'Amit R Medical',     area:'Khed'            },
+                { name:'Amit R Medical',     area:'Hupari'          },
+                { name:'D&C Care Pharmacy',  area:'Gadhinglaj'      },
+                { name:'Princess Matching',  area:'Gadhinglaj'      },
+                { name:'My Baby',            area:'Ghati Darwaja'   },
               ].map((shop, i) => (
                 <motion.div key={i} variants={staggerItem}
                   whileHover={{ y:-3, transition:{ duration:0.2 } }}
@@ -248,15 +248,13 @@ export default function About() {
                       {shop.area}
                     </p>
                   </div>
-                  {shop.gmb ? (
-                    <a href={shop.gmb} target="_blank" rel="noopener noreferrer"
-                      className="shrink-0 w-8 h-8 rounded-lg bg-primary flex items-center justify-center hover:bg-primary-dark transition-colors"
-                      title="View on Google Maps">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                      </svg>
-                    </a>
-                  ) : null}
+                  <a href="https://share.google/vhIeljqAFweHKrdqt" target="_blank" rel="noopener noreferrer"
+                    className="shrink-0 w-8 h-8 rounded-lg bg-primary flex items-center justify-center hover:bg-primary-dark transition-colors"
+                    title="View on Google Maps">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                  </a>
                 </motion.div>
               ))}
             </motion.div>

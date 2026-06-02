@@ -4,16 +4,18 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
 
-const BASE = import.meta.env.PROD ? '' : 'http://localhost:5000';
+const BG_COLORS = ['bg-blue-50','bg-purple-50','bg-red-50','bg-yellow-50','bg-green-50','bg-pink-50','bg-indigo-50','bg-orange-50'];
 
-const CATEGORIES_META = {
-  tablets:    { image: `${BASE}/uploads/1T%20FOL%20MD%20Tab/1.jpg`,      bg: 'bg-blue-50'   },
-  capsules:   { image: `${BASE}/uploads/Folok%20DHA/1.png`,              bg: 'bg-purple-50' },
-  injections: { image: `${BASE}/uploads/Endohope%20AQ%2050mg/1.png`,     bg: 'bg-red-50'    },
-  vitamins:   { image: `${BASE}/uploads/AFC%20Boost/1.jpg`,              bg: 'bg-yellow-50' },
+const getCategoryImage = (cat) => {
+  if (!cat.image) return null;
+  // Already base64
+  if (cat.image.startsWith('data:')) return cat.image;
+  // Absolute URL
+  if (cat.image.startsWith('http')) return cat.image;
+  // Relative path
+  const base = import.meta.env.VITE_IMAGE_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
+  return `${base}/${cat.image.replace(/^\//, '')}`;
 };
-
-const DEFAULT = { image: `${BASE}/uploads/1T%20FOL%20MD%20Tab/1.jpg`, bg: 'bg-gray-50' };
 
 export default function CategorySlider({ categories = [] }) {
   if (!categories.length) return (
@@ -46,7 +48,8 @@ export default function CategorySlider({ categories = [] }) {
       className="!overflow-hidden category-swiper"
     >
       {slides.map((cat, i) => {
-        const meta = CATEGORIES_META[cat.slug] || DEFAULT;
+        const imgSrc = getCategoryImage(cat);
+        const bg = BG_COLORS[cat.id % BG_COLORS.length] || 'bg-gray-50';
         return (
           <SwiperSlide key={`${cat.id}-${i}`}>
             <Link to={`/medicines?category=${cat.slug}`}>
@@ -54,19 +57,23 @@ export default function CategorySlider({ categories = [] }) {
                 className="flex flex-col items-center gap-3 py-3 cursor-pointer"
                 whileHover={{ y: -6, transition: { duration: 0.2 } }}
               >
-                        {/* Circle image */}
+                {/* Circle image */}
                 <motion.div
-                  className={`w-36 h-36 rounded-full mx-auto overflow-hidden ${meta.bg}
-                              border-4 border-white shadow-md relative`}
+                  className={`w-36 h-36 rounded-full mx-auto overflow-hidden ${bg} border-4 border-white shadow-md flex items-center justify-center`}
                   whileHover={{ scale: 1.08, boxShadow: '0 8px 24px rgba(4,75,153,0.18)' }}
                   transition={{ type: 'spring', stiffness: 280, damping: 18 }}
                 >
-                  <img
-                    src={meta.image}
-                    alt={cat.name}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
+                  {imgSrc ? (
+                    <img
+                      src={imgSrc}
+                      alt={cat.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      onError={e => { e.target.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <span className="text-4xl">💊</span>
+                  )}
                 </motion.div>
 
                 {/* Label */}
