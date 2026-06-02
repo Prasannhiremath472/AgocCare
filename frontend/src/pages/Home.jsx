@@ -4,6 +4,9 @@ import { Helmet } from 'react-helmet-async';
 import {
   motion, AnimatePresence, useScroll, useTransform
 } from 'framer-motion';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay } from 'swiper/modules';
+import 'swiper/css';
 import { getFeatured, getCategories, getOffers } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import CategorySlider from '../components/CategorySlider';
@@ -552,26 +555,34 @@ export default function Home() {
             <p className="section-sub max-w-md mx-auto">Committed to making healthcare accessible, affordable and reliable for every Indian.</p>
           </motion.div>
 
-          {/* Continuous marquee slider */}
-          <div className="overflow-hidden w-full">
-            <div
-              className="flex gap-5"
-              style={{ animation: 'marquee 30s linear infinite', width: 'max-content', willChange: 'transform' }}
-            >
-              {[...WHY, ...WHY].map((w, i) => (
-                <div
-                  key={i}
-                  className="flex flex-col items-start gap-3 bg-white rounded-2xl p-6 shadow-card border border-teal-mid/30 cursor-default shrink-0 w-72"
-                >
+          {/* Continuous WHY slider — Swiper same as category */}
+          <Swiper
+            modules={[Autoplay]}
+            loop={true}
+            speed={3000}
+            autoplay={{ delay: 0, disableOnInteraction: false, pauseOnMouseEnter: true }}
+            allowTouchMove={true}
+            breakpoints={{
+              0:    { slidesPerView: 1.2, spaceBetween: 16 },
+              480:  { slidesPerView: 2,   spaceBetween: 20 },
+              768:  { slidesPerView: 3,   spaceBetween: 20 },
+              1024: { slidesPerView: 4,   spaceBetween: 20 },
+              1280: { slidesPerView: 5,   spaceBetween: 20 },
+            }}
+            className="!overflow-hidden"
+          >
+            {[...WHY, ...WHY, ...WHY].map((w, i) => (
+              <SwiperSlide key={i}>
+                <div className="flex flex-col items-start gap-3 bg-white rounded-2xl p-6 shadow-card border border-teal-mid/30 cursor-default h-full">
                   <div className="w-12 h-12 bg-primary-light rounded-xl flex items-center justify-center text-2xl shrink-0">
                     {w.icon}
                   </div>
                   <h3 className="font-bold text-teal">{w.title}</h3>
                   <p className="text-sm text-gray-500 leading-relaxed">{w.sub}</p>
                 </div>
-              ))}
-            </div>
-          </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
       </section>
 

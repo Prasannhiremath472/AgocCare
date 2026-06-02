@@ -1,9 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay } from 'swiper/modules';
+import 'swiper/css';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
 import { getCategories } from '../services/api';
+
+const NAV_ITEMS = [
+  '🚚 Free delivery on orders above ₹499',
+  '💊 100% genuine medicines',
+  '🔒 Secure payments via Razorpay',
+  '📞 24/7 Pharmacist support',
+];
 
 const CATEGORIES_ICONS = {
   tablets:           '💊',
@@ -76,22 +86,30 @@ export default function Navbar() {
             transition={{ duration: 0.3 }}
             className="bg-primary text-white text-xs font-medium overflow-hidden"
           >
-            <div className="relative flex items-center justify-center py-2 px-8">
-              <div className="overflow-hidden w-full max-w-3xl">
-                <div className="flex whitespace-nowrap gap-16" style={{ animation: 'marquee 30s linear infinite', width: 'max-content', willChange: 'transform' }}>
-                  {[...Array(2)].map((_, k) => (
-                    <span key={k} className="flex items-center gap-8 shrink-0">
-                      <span>🚚 Free delivery on orders above ₹499</span>
-                      <span className="opacity-40">|</span>
-                      <span>💊 100% genuine medicines</span>
-                      <span className="opacity-40">|</span>
-                      <span>🔒 Secure payments via Razorpay</span>
-                      <span className="opacity-40">|</span>
-                      <span>📞 24/7 Pharmacist support</span>
-                      <span className="opacity-40">|</span>
-                    </span>
+            <div className="relative flex items-center py-1.5 px-8">
+              <div className="overflow-hidden w-full">
+                <Swiper
+                  modules={[Autoplay]}
+                  loop={true}
+                  speed={3000}
+                  autoplay={{ delay: 0, disableOnInteraction: false }}
+                  allowTouchMove={false}
+                  breakpoints={{
+                    0:   { slidesPerView: 1, spaceBetween: 0 },
+                    480: { slidesPerView: 2, spaceBetween: 16 },
+                    768: { slidesPerView: 3, spaceBetween: 16 },
+                    1024:{ slidesPerView: 4, spaceBetween: 16 },
+                  }}
+                  className="!overflow-hidden"
+                >
+                  {[...NAV_ITEMS, ...NAV_ITEMS].map((item, i) => (
+                    <SwiperSlide key={i}>
+                      <span className="flex items-center justify-center gap-2 text-white text-xs font-medium py-1 whitespace-nowrap">
+                        {item}
+                      </span>
+                    </SwiperSlide>
                   ))}
-                </div>
+                </Swiper>
               </div>
               <button onClick={() => setAnnounce(false)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100 transition-opacity">
