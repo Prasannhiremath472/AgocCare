@@ -552,41 +552,26 @@ export default function Home() {
             <p className="section-sub max-w-md mx-auto">Committed to making healthcare accessible, affordable and reliable for every Indian.</p>
           </motion.div>
 
-          {/* Continuous marquee slider — fixed pixel speed across all devices */}
-          {(() => {
-            // card width=288px (w-72) + gap=20px (gap-5) = 308px per card
-            // total width of ONE set = WHY.length * 308px
-            // duration = totalWidth / speed(px/s) — same visual speed on every device
-            const cardW = 308;
-            const totalW = WHY.length * cardW;
-            const speed = 60; // px per second — constant on all devices
-            const duration = totalW / speed;
-            return (
-              <div className="overflow-hidden w-full">
+          {/* Continuous marquee slider */}
+          <div className="overflow-hidden w-full">
+            <div
+              className="flex gap-5"
+              style={{ animation: 'marquee 30s linear infinite', width: 'max-content', willChange: 'transform' }}
+            >
+              {[...WHY, ...WHY].map((w, i) => (
                 <div
-                  className="flex gap-5"
-                  style={{
-                    width: `${totalW * 2}px`, // exactly 2 copies
-                    animation: `marquee ${duration}s linear infinite`,
-                    willChange: 'transform',
-                  }}
+                  key={i}
+                  className="flex flex-col items-start gap-3 bg-white rounded-2xl p-6 shadow-card border border-teal-mid/30 cursor-default shrink-0 w-72"
                 >
-                  {[...WHY, ...WHY].map((w, i) => (
-                    <div
-                      key={i}
-                      className="flex flex-col items-start gap-3 bg-white rounded-2xl p-6 shadow-card border border-teal-mid/30 cursor-default shrink-0 w-72"
-                    >
-                      <div className="w-12 h-12 bg-primary-light rounded-xl flex items-center justify-center text-2xl shrink-0">
-                        {w.icon}
-                      </div>
-                      <h3 className="font-bold text-teal">{w.title}</h3>
-                      <p className="text-sm text-gray-500 leading-relaxed">{w.sub}</p>
-                    </div>
-                  ))}
+                  <div className="w-12 h-12 bg-primary-light rounded-xl flex items-center justify-center text-2xl shrink-0">
+                    {w.icon}
+                  </div>
+                  <h3 className="font-bold text-teal">{w.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{w.sub}</p>
                 </div>
-              </div>
-            );
-          })()}
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 

@@ -78,8 +78,7 @@ export default function Navbar() {
           >
             <div className="relative flex items-center justify-center py-2 px-8">
               <div className="overflow-hidden w-full max-w-3xl">
-                <div className="flex whitespace-nowrap gap-16"
-                  style={{ animation: 'marquee 20s linear infinite', willChange: 'transform' }}>
+                <div className="flex whitespace-nowrap gap-16" style={{ animation: 'marquee 30s linear infinite', width: 'max-content', willChange: 'transform' }}>
                   {[...Array(2)].map((_, k) => (
                     <span key={k} className="flex items-center gap-8 shrink-0">
                       <span>🚚 Free delivery on orders above ₹499</span>
