@@ -13,6 +13,13 @@ const EMPTY = {
   prescription_required: false,
 };
 
+const calcPrice = (mrp, off) => {
+  const m = parseFloat(mrp);
+  const o = parseFloat(off);
+  if (!m || isNaN(m) || isNaN(o) || off === '' || o < 0 || o >= 100) return '';
+  return (m - (m * o / 100)).toFixed(2);
+};
+
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB per image
 
 function toBase64(file) {
@@ -191,6 +198,7 @@ export default function AdminProducts() {
   const [editing, setEditing]       = useState(null);
   const [form, setForm]             = useState(EMPTY);
   const [mainImage, setMainImage]   = useState(null); // File for main image
+  const [offPercent, setOffPercent] = useState('');   // Discount % helper field
   const [saving, setSaving]         = useState(false);
   const [search, setSearch]         = useState('');
   const [activeTab, setActiveTab]   = useState('details'); // 'details' | 'gallery'
@@ -209,11 +217,16 @@ export default function AdminProducts() {
 
   const openAdd = () => {
     setForm(EMPTY); setEditing(null); setMainImage(null);
-    setActiveTab('details'); setShowForm(true);
+    setOffPercent(''); setActiveTab('details'); setShowForm(true);
   };
 
   const openEdit = p => {
     setForm({ ...p, expiry_date: p.expiry_date?.split('T')[0] || '' });
+    // Compute off% from existing mrp and price
+    const off = p.mrp && p.price && p.mrp > p.price
+      ? (((p.mrp - p.price) / p.mrp) * 100).toFixed(2)
+      : '';
+    setOffPercent(off);
     setEditing(p.id); setMainImage(null);
     setActiveTab('details'); setShowForm(true);
   };
@@ -461,8 +474,6 @@ export default function AdminProducts() {
                     {[
                       ['name','Product Name *','text',true],
                       ['slug','URL Slug *','text',true],
-                      ['price','Selling Price (₹) *','number',true],
-                      ['mrp','MRP (₹)','number',false],
                       ['stock','Stock Qty *','number',true],
                       ['manufacturer','Manufacturer','text',false],
                       ['composition','Composition / Salt','text',false],
@@ -474,6 +485,78 @@ export default function AdminProducts() {
                           className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-teal bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"/>
                       </div>
                     ))}
+
+                    {/* MRP + OFF% + Selling Price — smart linked row */}
+                    <div className="col-span-2">
+                      <label className="block text-[11px] font-black text-gray-500 mb-1.5 uppercase tracking-wider">Pricing</label>
+                      <div className="grid grid-cols-3 gap-3">
+                        {/* MRP */}
+                        <div>
+                          <label className="block text-[10px] text-gray-400 mb-1">MRP (₹)</label>
+                          <input
+                            name="mrp" type="number" step="0.01" min="0"
+                            placeholder="e.g. 200"
+                            value={form.mrp}
+                            onChange={e => {
+                              const mrp = e.target.value;
+                              setForm(f => {
+                                const newPrice = calcPrice(mrp, offPercent);
+                                return { ...f, mrp, price: newPrice !== '' ? newPrice : f.price };
+                              });
+                            }}
+                            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-teal bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                          />
+                        </div>
+                        {/* OFF % */}
+                        <div>
+                          <label className="block text-[10px] text-gray-400 mb-1">Discount (%)</label>
+                          <div className="relative">
+                            <input
+                              type="number" step="0.01" min="0" max="99"
+                              placeholder="e.g. 15"
+                              value={offPercent}
+                              onChange={e => {
+                                const off = e.target.value;
+                                setOffPercent(off);
+                                const newPrice = calcPrice(form.mrp, off);
+                                if (newPrice !== '') setForm(f => ({ ...f, price: newPrice }));
+                              }}
+                              className="w-full border border-cta rounded-xl px-3 py-2.5 text-sm text-cta font-bold bg-cta/5 focus:bg-white focus:outline-none focus:ring-2 focus:ring-cta transition-all"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-cta">%</span>
+                          </div>
+                          {offPercent && parseFloat(offPercent) > 0 && form.mrp && (
+                            <p className="text-[10px] text-cta font-semibold mt-1">
+                              Save ₹{(parseFloat(form.mrp) * parseFloat(offPercent) / 100).toFixed(2)}
+                            </p>
+                          )}
+                        </div>
+                        {/* Selling Price */}
+                        <div>
+                          <label className="block text-[10px] text-gray-400 mb-1">Selling Price (₹) *</label>
+                          <input
+                            name="price" type="number" step="0.01" min="0" required
+                            placeholder="Auto or manual"
+                            value={form.price}
+                            onChange={e => {
+                              const price = e.target.value;
+                              setForm(f => ({ ...f, price }));
+                              // Recalculate off% if mrp is set
+                              if (form.mrp && price) {
+                                const off = (((parseFloat(form.mrp) - parseFloat(price)) / parseFloat(form.mrp)) * 100).toFixed(2);
+                                setOffPercent(off > 0 ? off : '');
+                              }
+                            }}
+                            className="w-full border border-primary rounded-xl px-3 py-2.5 text-sm text-primary font-bold bg-primary/5 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                          />
+                          {form.mrp && form.price && parseFloat(form.mrp) > parseFloat(form.price) && (
+                            <p className="text-[10px] text-primary font-semibold mt-1">
+                              {(((parseFloat(form.mrp) - parseFloat(form.price)) / parseFloat(form.mrp)) * 100).toFixed(0)}% off MRP
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
 
                     <div>
                       <label className="block text-[11px] font-black text-gray-500 mb-1.5 uppercase tracking-wider">Category *</label>

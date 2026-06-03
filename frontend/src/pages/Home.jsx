@@ -569,7 +569,7 @@ export default function Home() {
               1024: { slidesPerView: 4,   spaceBetween: 20 },
               1280: { slidesPerView: 5,   spaceBetween: 20 },
             }}
-            className="!overflow-hidden"
+            className="!overflow-hidden why-swiper"
           >
             {[...WHY, ...WHY, ...WHY].map((w, i) => (
               <SwiperSlide key={i}>

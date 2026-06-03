@@ -100,7 +100,7 @@ export default function Navbar() {
                     768: { slidesPerView: 3, spaceBetween: 16 },
                     1024:{ slidesPerView: 4, spaceBetween: 16 },
                   }}
-                  className="!overflow-hidden"
+                  className="!overflow-hidden nav-swiper"
                 >
                   {[...NAV_ITEMS, ...NAV_ITEMS].map((item, i) => (
                     <SwiperSlide key={i}>

@@ -77,7 +77,10 @@
 /* Swiper */
 .swiper-button-next,
 .swiper-button-prev { display: none !important; }
-.category-swiper .swiper-wrapper { transition-timing-function: linear !important; }
+/* All continuous auto-sliding swipers must be linear */
+.category-swiper .swiper-wrapper,
+.why-swiper .swiper-wrapper,
+.nav-swiper .swiper-wrapper { transition-timing-function: linear !important; }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
