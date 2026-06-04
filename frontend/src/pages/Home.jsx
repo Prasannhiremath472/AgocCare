@@ -10,7 +10,6 @@ import 'swiper/css';
 import { getFeatured, getCategories, getOffers } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import CategorySlider from '../components/CategorySlider';
-import GynecologistConsultation from '../components/GynecologistConsultation';
 import {
   fadeUp, fadeIn, fadeLeft, fadeRight, scaleIn,
   staggerContainer, staggerItem, viewport, popIn
@@ -103,12 +102,83 @@ const Stars = ({ n }) => Array.from({ length: 5 }, (_, i) => (
 ));
 
 // ── Board Members Accordion ────────────────────────────────────────────────
+const DIRECTORS = [
+  {
+    name: 'Dadaso Vasant Kadavekar', role: 'Director — Retail & Wholesale',
+    img: 'director1.png', initials: 'DK',
+    stats: [
+      { label: 'Experience',        value: '29 Yrs' },
+      { label: 'Retail Since',      value: '1997'   },
+      { label: 'Wholesale Since',   value: '2014'   },
+      { label: 'Company Est.',      value: '2016'   },
+    ],
+    bio: 'Leading pharma marketing, wholesale medical distribution & retail medical stores across Maharashtra for over 10 years.',
+    vision: '🚀 Vision: Launch pan-India within 4 years.',
+  },
+  {
+    name: 'Ashok Sakharam Surve', role: 'Director — Sales & Marketing',
+    img: 'director2.jpeg', initials: 'AS',
+    stats: [
+      { label: 'Experience',   value: '29 Yrs' },
+      { label: 'Career Start', value: '1997'   },
+      { label: 'As MR',        value: '1997'   },
+      { label: 'Promoted ZSM', value: '2016'   },
+    ],
+    bio: 'Started as Medical Representative in 1997, promoted to Zonal Sales Manager (ZSM) in 2016. Expert in pharmaceutical sales & distribution.',
+    vision: '🚀 Vision: Launch pan-India within 4 years.',
+  },
+];
+
+function DirectorMiniCard({ member: m }) {
+  const [showMore, setShowMore] = useState(false);
+  return (
+    <div className="bg-white/10 rounded-xl px-3 py-3 text-center">
+      <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white/30 mx-auto mb-2">
+        <img src={`${import.meta.env.PROD ? '' : 'http://localhost:5000'}/uploads/Directors/${m.img}`}
+          alt={m.name} className="w-full h-full object-cover object-top"
+          onError={e => {
+            e.target.style.display = 'none';
+            e.target.parentNode.innerHTML = `<div class="w-full h-full bg-white/20 flex items-center justify-center text-white font-black text-base">${m.initials}</div>`;
+          }}/>
+      </div>
+      <p className="text-white text-xs font-bold leading-tight">{m.name}</p>
+      <p className="text-white/70 text-[10px] mt-0.5">{m.role}</p>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-1 mt-2">
+        {m.stats.map(s => (
+          <div key={s.label} className="bg-white/10 rounded-lg px-1.5 py-1 text-center">
+            <p className="text-white text-[11px] font-extrabold">{s.value}</p>
+            <p className="text-white/60 text-[9px] leading-tight">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Show More */}
+      <AnimatePresence>
+        {showMore && (
+          <motion.div initial={{ opacity:0, height:0 }} animate={{ opacity:1, height:'auto' }}
+            exit={{ opacity:0, height:0 }} transition={{ duration:0.2 }}
+            className="overflow-hidden mt-2 text-left">
+            <p className="text-white/80 text-[10px] leading-relaxed mb-1.5">{m.bio}</p>
+            <p className="text-yellow-300 text-[10px] font-semibold">{m.vision}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <button onClick={() => setShowMore(v => !v)}
+        className="mt-2 w-full text-[10px] font-bold text-white/80 border border-white/20 rounded-lg py-1.5 hover:bg-white/10 transition-colors">
+        {showMore ? 'Show Less ▲' : 'Show More ▼'}
+      </button>
+    </div>
+  );
+}
+
 function BoardAccordion() {
   const [open, setOpen] = useState(false);
   return (
     <div className="rounded-xl overflow-hidden" style={{ backgroundColor: '#035AA6' }}>
       <button onClick={() => setOpen(v => !v)}
-        className="flex items-center justify-between w-full px-5 py-3.5 font-semibold text-white text-sm">
+        className="flex items-center justify-between w-full px-5 py-3.5 font-bold text-white text-base">
         <span>Board Members</span>
         <svg className={`w-5 h-5 transition-transform duration-200 ${open ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7"/>
@@ -120,28 +190,7 @@ function BoardAccordion() {
             exit={{ height:0, opacity:0 }} transition={{ duration:0.25 }}
             className="overflow-hidden bg-white/10 px-5 pb-4">
             <div className="grid grid-cols-2 gap-3 pt-3">
-              {[
-                { name:'Dadaso Vasant Kadavekar', role:'Director', img:'director1.png', initials:'DK' },
-                { name:'Ashok Sakharam Surve',   role:'Director', img:'director2.jpeg', initials:'AS' },
-              ].map(m => (
-                <div key={m.name} className="flex flex-col items-center gap-2 bg-white/10 rounded-xl px-3 py-3 text-center">
-                  <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white/30 shrink-0">
-                    <img
-                      src={`${import.meta.env.PROD ? '' : 'http://localhost:5000'}/uploads/Directors/${m.img}`}
-                      alt={m.name}
-                      className="w-full h-full object-cover object-top"
-                      onError={e => {
-                        e.target.style.display = 'none';
-                        e.target.parentNode.innerHTML = `<div class="w-full h-full bg-white/20 flex items-center justify-center text-white font-black text-lg">${m.initials}</div>`;
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <p className="text-white text-xs font-bold leading-tight">{m.name}</p>
-                    <p className="text-white/70 text-[10px] mt-0.5">{m.role}</p>
-                  </div>
-                </div>
-              ))}
+              {DIRECTORS.map(m => <DirectorMiniCard key={m.name} member={m} />)}
             </div>
           </motion.div>
         )}
@@ -312,14 +361,14 @@ export default function Home() {
 
             {/* Image side */}
             <motion.div variants={fadeLeft} className="relative flex flex-col gap-3">
-              {/* Main image — sliderimage1 */}
-              <div className="relative rounded-3xl overflow-hidden shadow-card-lg aspect-[4/3]">
+              {/* Main image — AgocCare brand image */}
+              <div className="relative rounded-3xl overflow-hidden shadow-card-lg bg-white">
                 <img
-                  src="https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=800&q=80"
-                  alt="Agoc Care Pharmacy"
-                  className="w-full h-full object-cover object-center"
+                  src={`${import.meta.env.PROD ? '' : 'http://localhost:5000'}/uploads/slider%20images/sliderimage1.jpeg`}
+                  alt="Agoc Care Brand"
+                  className="w-full h-auto object-contain"
+                  onError={e => { e.target.src = `${import.meta.env.PROD ? '' : 'http://localhost:5000'}/uploads/slider%20images/sliderimage2.jpeg`; }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent" />
               </div>
 
               {/* Est. badge */}
@@ -384,13 +433,13 @@ export default function Home() {
 
                 {/* Our Products — link */}
                 {[
-                  { label: 'Our Products',       hash: '#our-products', color: '#079DDF' },
-                  { label: 'Our Wholesale Shop', hash: '#wholesale',    color: '#035AA6' },
-                  { label: 'Our Retail Shops',   hash: '#retail',       color: '#079DDF' },
+                  { label: 'Our Products',       to: '/medicines',          color: '#079DDF' },
+                  { label: 'Our Wholesale Shop', to: '/about#wholesale',    color: '#035AA6' },
+                  { label: 'Our Retail Shops',   to: '/about#retail',       color: '#079DDF' },
                 ].map(btn => (
                   <motion.div key={btn.label} variants={staggerItem}>
-                    <Link to={`/about${btn.hash}`}
-                      className="flex items-center justify-between w-full px-5 py-3.5 rounded-xl font-semibold text-white text-sm transition-all duration-150 hover:opacity-90 hover:translate-x-1 group"
+                    <Link to={btn.to}
+                      className="flex items-center justify-between w-full px-5 py-3.5 rounded-xl font-bold text-white text-base transition-all duration-150 hover:opacity-90 hover:translate-x-1 group"
                       style={{ backgroundColor: btn.color }}>
                       <span>{btn.label}</span>
                       <svg className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -408,11 +457,6 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
-
-      {/* ══════════════════════════════════════
-          GYNECOLOGIST CONSULTATION FORM
-      ══════════════════════════════════════ */}
-      <GynecologistConsultation />
 
       {/* ══════════════════════════════════════
           CATEGORIES

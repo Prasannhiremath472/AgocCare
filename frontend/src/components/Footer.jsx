@@ -19,7 +19,9 @@ export default function Footer() {
         {/* Brand */}
         <motion.div variants={staggerItem} className="md:col-span-2">
           <Link to="/" className="flex items-center gap-2 mb-4">
-            <img src="/Agoccarelogo.jpeg" alt="AgocCare" className="h-10 w-auto object-contain brightness-0 invert" />
+            <div className="bg-white rounded-xl px-3 py-1.5 inline-flex">
+              <img src="/Agoccarelogo.jpeg" alt="AgocCare" className="h-10 w-auto object-contain" />
+            </div>
           </Link>
           <p className="text-sm text-white/60 leading-relaxed mb-2 max-w-xs">
             Empowering Life — Genuine medicines & healthcare products delivered to your door.

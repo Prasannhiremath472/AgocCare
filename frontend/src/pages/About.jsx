@@ -33,6 +33,59 @@ const SECTIONS = [
   { id: 'contact',      label: 'Contact Us'          },
 ];
 
+function DirectorCard({ director: d }) {
+  const [showMore, setShowMore] = useState(false);
+  const imgSrc = `${import.meta.env.PROD ? '' : 'http://localhost:5000'}/uploads/Directors/${d.img}`;
+  return (
+    <motion.div variants={staggerItem}
+      className="bg-white rounded-2xl border border-teal-mid/30 shadow-card overflow-hidden">
+      {/* Top — photo + name */}
+      <div className="flex flex-col items-center pt-8 pb-5 px-6 text-center">
+        <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-primary/20 shadow-lg mb-4">
+          <img src={imgSrc} alt={d.name} className="w-full h-full object-cover object-top"
+            onError={e => {
+              e.target.style.display = 'none';
+              e.target.parentNode.classList.add('flex', 'items-center', 'justify-center', d.color);
+              e.target.parentNode.innerHTML = `<span class="text-white text-3xl font-extrabold">${d.initials}</span>`;
+            }}/>
+        </div>
+        <h3 className="text-xl font-extrabold text-teal">{d.name}</h3>
+        <p className="text-secondary font-bold text-sm mt-1">{d.role}</p>
+      </div>
+
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 gap-px bg-gray-100 border-t border-gray-100">
+        {d.stats.map(s => (
+          <div key={s.label} className="bg-white px-4 py-3 text-center">
+            <p className="text-base font-extrabold text-primary">{s.value}</p>
+            <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Show More toggle */}
+      <div className="px-6 pb-6 pt-4">
+        <AnimatePresence>
+          {showMore && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.25 }}
+              className="overflow-hidden">
+              <p className="text-sm text-gray-600 leading-relaxed mb-3">{d.bio}</p>
+              <div className="bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 text-sm font-semibold text-primary">
+                {d.vision}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <button onClick={() => setShowMore(v => !v)}
+          className="mt-3 w-full flex items-center justify-center gap-2 text-sm font-bold text-primary border border-primary/30 rounded-xl py-2.5 hover:bg-primary hover:text-white transition-all duration-200">
+          {showMore ? 'Show Less ▲' : 'Show More ▼'}
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function About() {
   const { hash } = useLocation();
   const [lightbox, setLightbox] = useState(null); // index of open image
@@ -153,9 +206,9 @@ export default function About() {
           <div className="container mx-auto max-w-5xl">
             <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={viewport}
               className="text-center mb-10">
-              <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-2">Locations</p>
-              <h2 className="text-3xl font-extrabold text-teal">Our Wholesale Shop</h2>
-              <p className="text-gray-500 text-sm mt-2 max-w-xl mx-auto">Visit us at any of our registered locations across Maharashtra.</p>
+              <p className="text-base font-bold text-secondary uppercase tracking-widest mb-2">Medical Locations</p>
+              <h2 className="text-5xl font-extrabold text-teal">Our Wholesale Shop</h2>
+              <p className="text-gray-500 text-base mt-2 max-w-xl mx-auto">Visit us at any of our registered locations across Maharashtra.</p>
             </motion.div>
             <motion.div className="grid md:grid-cols-3 gap-6"
               variants={staggerContainer(0.1)} initial="hidden" whileInView="visible" viewport={viewport}>
@@ -180,7 +233,7 @@ export default function About() {
                 },
                 {
                   type: 'Shop Address',
-                  name: 'Aapli Farmacy',
+                  name: 'Aapli Pharmacy',
                   address: '1511 2nd Floor, Mahalaxmi Square, Kodoli, Tal - Panhala, Dist - Kolhapur 416114',
                   icon: '🏪',
                   color: 'bg-green-50 border-green-200',
@@ -194,12 +247,12 @@ export default function About() {
                   {/* Card header */}
                   <div className={`${loc.header} px-5 py-4 flex items-center gap-3`}>
                     <span className="text-3xl">{loc.icon}</span>
-                    <span className="text-white font-black text-sm tracking-wide">{loc.type}</span>
+                    <span className="text-white font-black text-base tracking-wide">{loc.type}</span>
                   </div>
                   {/* Card body */}
                   <div className="px-5 py-5">
-                    <p className="text-sm font-black text-teal mb-2">{loc.name}</p>
-                    <p className="text-xs text-gray-600 leading-relaxed">{loc.address}</p>
+                    <p className="text-base font-black text-teal mb-2">{loc.name}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">{loc.address}</p>
                   </div>
                 </motion.div>
               ))}
@@ -212,9 +265,9 @@ export default function About() {
           <div className="container mx-auto max-w-5xl">
             <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={viewport}
               className="text-center mb-10">
-              <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-2">Retail</p>
-              <h2 className="text-3xl font-extrabold text-teal">Our Retail Shops</h2>
-              <p className="text-gray-500 text-sm mt-2 max-w-xl mx-auto">
+              <p className="text-base font-bold text-secondary uppercase tracking-widest mb-2">Medical Locations</p>
+              <h2 className="text-5xl font-extrabold text-teal">Our Retail Shops</h2>
+              <p className="text-gray-500 text-base mt-2 max-w-xl mx-auto">
                 Find us at these locations across Kolhapur and nearby areas. Click the map icon to get directions.
               </p>
             </motion.div>
@@ -238,10 +291,10 @@ export default function About() {
                 <motion.div key={i} variants={staggerItem}
                   whileHover={{ y:-3, transition:{ duration:0.2 } }}
                   className="bg-white rounded-2xl border border-teal-mid/30 shadow-sm px-4 py-4 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-lg shrink-0">🏪</div>
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-2xl shrink-0">🏪</div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black text-teal truncate">{shop.name}</p>
-                    <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                    <p className="text-base font-black text-teal truncate">{shop.name}</p>
+                    <p className="text-sm text-gray-500 mt-0.5 flex items-center gap-1">
                       <svg className="w-3 h-3 text-secondary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                       </svg>
@@ -304,35 +357,37 @@ export default function About() {
           <div className="container mx-auto max-w-5xl">
             <motion.div className="text-center mb-10"
               variants={fadeUp} initial="hidden" whileInView="visible" viewport={viewport}>
-              <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-2">Leadership</p>
-              <h2 className="text-3xl font-extrabold text-teal">Board Members</h2>
+              <p className="text-base font-bold text-secondary uppercase tracking-widest mb-2">Leadership</p>
+              <h2 className="text-5xl font-extrabold text-teal">Board Members</h2>
             </motion.div>
-            <motion.div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto"
+            <motion.div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto"
               variants={staggerContainer(0.1)} initial="hidden" whileInView="visible" viewport={viewport}>
-
-              {/* Director 1 — Dadaso Vasant Kadavekar */}
               {[
-                { img: 'director1.png', name: 'Dadaso Vasant Kadavekar', initials: 'DK', color: 'bg-primary' },
-                { img: 'director2.jpeg', name: 'Ashok Sakharam Surve',    initials: 'AS', color: 'bg-secondary' },
-              ].map(d => (
-                <motion.div key={d.name} variants={staggerItem}
-                  className="bg-white rounded-2xl p-8 border border-teal-mid/30 shadow-card text-center">
-                  <div className="w-44 h-44 rounded-full overflow-hidden mx-auto mb-5 border-4 border-primary/20 shadow-lg">
-                    <img
-                      src={`${import.meta.env.PROD?'':'http://localhost:5000'}/uploads/Directors/${d.img}`}
-                      alt={d.name}
-                      className="w-full h-full object-cover object-top"
-                      onError={e => { e.target.style.display='none'; e.target.parentNode.classList.add('flex','items-center','justify-center',d.color); e.target.parentNode.innerHTML = `<span class="text-white text-3xl font-extrabold">${d.initials}</span>`; }}
-                    />
-                  </div>
-                  <h3 className="text-lg font-extrabold text-teal">{d.name}</h3>
-                  <p className="text-secondary font-semibold text-sm mt-1">Director</p>
-                  <p className="text-gray-500 text-sm mt-3 leading-relaxed">
-                    Director at Agoc Care Private Limited, committed to delivering genuine healthcare products across India.
-                  </p>
-                </motion.div>
-              ))}
-
+                {
+                  img: 'director1.png', name: 'Dadaso Vasant Kadavekar', initials: 'DK', color: 'bg-primary',
+                  role: 'Director — Retail & Wholesale',
+                  stats: [
+                    { label: 'Industry Experience', value: '29 Years' },
+                    { label: 'Retail Business Since', value: '1997' },
+                    { label: 'Wholesale Since',       value: '2014' },
+                    { label: 'Company Registered',    value: '2016' },
+                  ],
+                  bio: 'Leading pharma marketing, wholesale medical distribution & retail medical stores across Maharashtra for over 10 years. Agoc Care Pvt. Ltd. operates licensed wholesale & retail pharma business.',
+                  vision: '🚀 Vision: Launch company pan-India within the next 4 years.',
+                },
+                {
+                  img: 'director2.jpeg', name: 'Ashok Sakharam Surve', initials: 'AS', color: 'bg-secondary',
+                  role: 'Director — Sales & Marketing',
+                  stats: [
+                    { label: 'Industry Experience', value: '29 Years' },
+                    { label: 'Career Started',      value: '1997 as MR' },
+                    { label: 'Promoted to ZSM',     value: '2016' },
+                    { label: 'Current Role',        value: 'Zonal Sales Manager' },
+                  ],
+                  bio: 'Started career in 1997 as a Medical Representative and rose to Zonal Sales Manager (ZSM) by 2016. Brings deep expertise in pharmaceutical sales, marketing, and zonal distribution management.',
+                  vision: '🚀 Vision: Launch company pan-India within the next 4 years.',
+                },
+              ].map(d => <DirectorCard key={d.name} director={d} />)}
             </motion.div>
           </div>
         </section>
