@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import SeoHead from '../components/SeoHead';
 import {
   motion, AnimatePresence, useScroll, useTransform
 } from 'framer-motion';
@@ -220,10 +220,7 @@ export default function Home() {
 
   return (
     <>
-      <Helmet>
-        <title>Agoc Care — Online Pharmacy | Genuine Medicines Delivered Fast</title>
-        <meta name="description" content="Buy genuine medicines, vitamins and healthcare products online. Fast delivery, secure payments, 24/7 pharmacist support." />
-      </Helmet>
+      <SeoHead pageKey="home" defaults={{ title: 'Agoc Care — Online Pharmacy | Genuine Medicines Delivered Fast', description: 'Buy genuine medicines, vitamins and healthcare products online. Fast delivery, secure payments, 24/7 pharmacist support.' }} />
 
       {/* ══════════════════════════════════════
           HERO — Full-image carousel

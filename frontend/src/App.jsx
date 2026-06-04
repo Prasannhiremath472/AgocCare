@@ -31,6 +31,7 @@ const AdminBulkUpload = lazy(() => import('./pages/admin/BulkUpload'));
 const AdminAuditLogs      = lazy(() => import('./pages/admin/AuditLogs'));
 const AdminConsultations  = lazy(() => import('./pages/admin/Consultations'));
 const AdminCategories     = lazy(() => import('./pages/admin/Categories'));
+const AdminSeo            = lazy(() => import('./pages/admin/Seo'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const AiChat       = lazy(() => import('./pages/AiChat'));
 const Prescription = lazy(() => import('./pages/Prescription'));
@@ -86,6 +87,7 @@ export default function App() {
           <Route path="audit-logs"    element={<AdminAuditLogs />} />
           <Route path="consultations" element={<AdminConsultations />} />
           <Route path="categories"   element={<AdminCategories />} />
+          <Route path="seo"          element={<AdminSeo />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

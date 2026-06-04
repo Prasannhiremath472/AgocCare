@@ -26,6 +26,7 @@ const analyticsRoutes    = require('./routes/analytics');
 const offerRoutes        = require('./routes/offers');
 const otpRoutes          = require('./routes/otp');
 const consultationRoutes = require('./routes/consultation');
+const seoRoutes          = require('./routes/seo');
 
 const app = express();
 
@@ -69,6 +70,7 @@ app.use('/api/analytics',    analyticsRoutes);
 app.use('/api/offers',       offerRoutes);
 app.use('/api/otp',          otpRoutes);
 app.use('/api/consultation', consultationRoutes);
+app.use('/api/seo',          seoRoutes);
 
 app.get('/', (req, res) => {
   res.send('AgocCare Backend Running Successfully');

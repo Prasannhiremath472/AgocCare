@@ -1,6 +1,6 @@
 ﻿import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import SeoHead from '../components/SeoHead';
 import { motion } from 'framer-motion';
 import { useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
@@ -120,7 +120,7 @@ export default function Checkout() {
 
   return (
     <>
-      <Helmet><title>Checkout | Agoc Care</title></Helmet>
+      <SeoHead pageKey="checkout" defaults={{ title: 'Checkout – AgocCare', robots: 'noindex,follow' }} />
 
       <div className="bg-teal-light min-h-screen py-10">
         <div className="container mx-auto px-4 max-w-5xl">

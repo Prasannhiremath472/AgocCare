@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import SeoHead from '../components/SeoHead';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getProducts, getCategories } from '../services/api';
 import ProductCard from '../components/ProductCard';
@@ -146,9 +146,11 @@ export default function Products() {
 
   return (
     <>
-      <Helmet>
-        <title>{`${search ? `"${search}" — ` : category ? `${category} — ` : ''}Medicines | Agoc Care+`}</title>
-      </Helmet>
+      <SeoHead
+        pageKey="products"
+        defaults={{ title: 'Buy Medicines Online – AgocCare', description: 'Browse 1000+ genuine medicines, vitamins and healthcare products at best prices.' }}
+        overrides={{ title: `${search ? `"${search}" — ` : category ? `${category} — ` : ''}Medicines | AgocCare` }}
+      />
 
       {/* Breadcrumb */}
       <motion.div

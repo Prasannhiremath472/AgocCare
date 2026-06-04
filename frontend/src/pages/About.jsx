@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
+import SeoHead from '../components/SeoHead';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, staggerItem, fadeUp, fadeLeft, fadeRight, viewport } from '../utils/motion';
@@ -48,7 +48,7 @@ export default function About() {
 
   return (
     <>
-      <Helmet><title>About Us | Agoc Care+</title></Helmet>
+      <SeoHead pageKey="about" defaults={{ title: 'About Us | AgocCare', description: 'Agoc Care Pvt Ltd – Licensed pharmaceutical company offering wholesale, retail & online medicine delivery since 2016.' }} />
       <div className="bg-teal-light min-h-screen">
 
         {/* Hero */}

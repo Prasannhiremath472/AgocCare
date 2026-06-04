@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import SeoHead from '../components/SeoHead';
 import { getOrders } from '../services/api';
 import { formatPrice } from '../utils/helpers';
 
@@ -23,7 +23,7 @@ export default function Orders() {
 
   return (
     <>
-      <Helmet><title>My Orders | Agoc Care</title></Helmet>
+      <SeoHead pageKey="orders" defaults={{ title: 'My Orders – AgocCare', robots: 'noindex,follow' }} />
       <div className="max-w-3xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">My Orders</h1>
         {loading ? (

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import SeoHead from '../components/SeoHead';
 import { motion } from 'framer-motion';
 import { loginSendOTP, loginVerifyOTP } from '../services/api';
 import { useAuthStore } from '../store/authStore';
@@ -58,7 +58,7 @@ export default function Login() {
 
   return (
     <>
-      <Helmet><title>Login | Agoc Care</title></Helmet>
+      <SeoHead pageKey="login" defaults={{ title: 'Sign In – AgocCare', robots: 'noindex,follow' }} />
       <div className="min-h-[85vh] bg-teal-light flex items-center justify-center px-4 py-12">
 
         <motion.div className="fixed top-20 left-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"

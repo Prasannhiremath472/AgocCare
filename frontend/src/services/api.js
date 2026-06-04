@@ -77,3 +77,8 @@ export const adminDeleteOffer = (id) => api.delete(`/offers/${id}`);
 
 export const extractPrescription = (formData) =>
   api.post('/prescription/extract', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+
+// SEO
+export const getAllSeo     = ()           => api.get('/seo');
+export const adminGetSeo  = ()           => api.get('/seo/admin/all');
+export const adminUpdateSeo = (key, data) => api.put(`/seo/admin/${key}`, data);

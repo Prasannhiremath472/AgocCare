@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import SeoHead from '../components/SeoHead';
 import api, { register } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
@@ -53,7 +53,7 @@ export default function Register() {
 
   return (
     <>
-      <Helmet><title>Create Account | Agoc Care</title></Helmet>
+      <SeoHead pageKey="register" defaults={{ title: 'Create Account – AgocCare', robots: 'noindex,follow' }} />
       <div className="min-h-[80vh] bg-teal-light flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md animate-fade-up">
           <div className="card p-8">

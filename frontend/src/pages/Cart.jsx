@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import SeoHead from '../components/SeoHead';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore } from '../store/cartStore';
 import { formatPrice, imgUrl } from '../utils/helpers';
@@ -37,7 +37,7 @@ export default function Cart() {
   if (items.length === 0) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center bg-teal-light">
-        <Helmet><title>Cart | Agoc Care</title></Helmet>
+        <SeoHead pageKey="cart" defaults={{ title: 'Cart – AgocCare', robots: 'noindex,follow' }} />
         <motion.div
           initial={{ opacity:0, scale:0.5 }}
           animate={{ opacity:1, scale:1 }}
@@ -80,7 +80,7 @@ export default function Cart() {
 
   return (
     <>
-      <Helmet><title>{`Cart (${items.length}) | Agoc Care`}</title></Helmet>
+      <SeoHead pageKey="cart" defaults={{ title: `Cart (${items.length}) – AgocCare`, robots: 'noindex,follow' }} overrides={{ title: `Cart (${items.length}) – AgocCare` }} />
       <div className="bg-teal-light min-h-screen py-8">
         <div className="container mx-auto px-4">
 

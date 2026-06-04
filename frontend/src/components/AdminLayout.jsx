@@ -52,6 +52,9 @@ const NAV = [
       { to: '/admin/consultations', label: 'Consultations', icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 8h.01M9 16h.01M13 12h3m-3 4h3"/></svg>
       )},
+      { to: '/admin/seo', label: 'SEO Settings', icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zm-7 4v-4m0 0V9m0 2h2m-2 0H9"/></svg>
+      )},
     ]
   },
 ];

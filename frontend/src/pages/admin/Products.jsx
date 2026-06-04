@@ -343,7 +343,7 @@ export default function AdminProducts() {
                   className="hover:bg-gray-50/70 transition-colors group">
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-teal-light border border-teal-mid/30 overflow-hidden flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 overflow-hidden flex items-center justify-center shrink-0">
                         {p.image ? (
                           <img src={p.image.startsWith('data:') ? p.image : imgUrl(p.image)}
                             alt={p.name} className="w-full h-full object-contain p-1"

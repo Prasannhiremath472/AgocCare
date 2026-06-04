@@ -26,7 +26,7 @@ export default function ProductCard({ product }) {
       className="bg-white rounded-xl border border-gray-100 overflow-hidden flex flex-col group"
     >
       {/* ── Image block ── */}
-      <Link to={`/medicines/${product.slug}`} className="relative block bg-gray-50 overflow-hidden">
+      <Link to={`/medicines/${product.slug}`} className="relative block bg-white overflow-hidden">
 
         {/* Top-left badge */}
         <div className="absolute top-2 left-2 z-10">

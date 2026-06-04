@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import SeoHead from '../components/SeoHead';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getProduct } from '../services/api';
 import { useCartStore } from '../store/cartStore';
@@ -63,10 +63,16 @@ export default function ProductDetail() {
 
   return (
     <>
-      <Helmet>
-        <title>{product.name} | Agoc Care</title>
-        <meta name="description" content={product.description || `Buy ${product.name} online at best price.`} />
-      </Helmet>
+      <SeoHead
+        pageKey="product_detail"
+        defaults={{ title: `${product.name} | AgocCare`, description: product.description || `Buy ${product.name} online at best price. Fast delivery across India.` }}
+        overrides={{
+          title: `${product.name} | AgocCare`,
+          description: product.description || `Buy ${product.name} online at best price. Fast delivery across India.`,
+          keywords: `${product.name}, ${product.composition || ''}, buy online, medicine`,
+          og_image: product.image?.startsWith('data:') ? '' : product.image || '',
+        }}
+      />
 
       <div className="bg-teal-light min-h-screen py-8 px-4">
         <div className="max-w-6xl mx-auto">
