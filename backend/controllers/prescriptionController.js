@@ -1,38 +1,30 @@
-const axios  = require('axios');
+const axios    = require('axios');
 const FormData = require('form-data');
-const sharp  = require('sharp');
-const db     = require('../models/db');
+const db       = require('../models/db');
 
-// ─── OCR.space API — much better than Tesseract for handwriting ─────────────
-// Free tier: 500 requests/month with 'helloworld' key
-// Get your free key at https://ocr.space/ocrapi (free, no credit card)
 const OCR_API_KEY = process.env.OCR_SPACE_KEY || 'helloworld';
 
+// ─── Detect file type from buffer magic bytes ────────────────────────────────
+function detectFileType(buffer) {
+  if (buffer[0] === 0xFF && buffer[1] === 0xD8) return { mime: 'image/jpeg', ext: 'JPG' };
+  if (buffer[0] === 0x89 && buffer[1] === 0x50) return { mime: 'image/png',  ext: 'PNG' };
+  if (buffer[0] === 0x47 && buffer[1] === 0x49) return { mime: 'image/gif',  ext: 'GIF' };
+  return { mime: 'image/jpeg', ext: 'JPG' }; // default
+}
+
 async function ocrSpaceExtract(buffer) {
-  // Preprocess image — upscale + enhance for better OCR
-  let processedBuffer;
-  try {
-    processedBuffer = await sharp(buffer)
-      .resize({ width: 2000, withoutEnlargement: false })
-      .grayscale()
-      .normalize()
-      .sharpen({ sigma: 1.5 })
-      .jpeg({ quality: 95 })
-      .toBuffer();
-  } catch {
-    processedBuffer = buffer;
-  }
+  const { mime, ext } = detectFileType(buffer);
 
   const form = new FormData();
   form.append('apikey', OCR_API_KEY);
   form.append('language', 'eng');
-  form.append('OCREngine', '2');       // Engine 2 = better for handwriting
-  form.append('scale', 'true');        // Auto-scale for better recognition
+  form.append('OCREngine', '2');
+  form.append('scale', 'true');
   form.append('detectOrientation', 'true');
-  form.append('filetype', 'JPG');
-  form.append('file', processedBuffer, {
-    filename: 'prescription.jpg',
-    contentType: 'image/jpeg',
+  form.append('filetype', ext);
+  form.append('file', buffer, {
+    filename: `prescription.${ext.toLowerCase()}`,
+    contentType: mime,
   });
 
   const res = await axios.post('https://api.ocr.space/parse/image', form, {
