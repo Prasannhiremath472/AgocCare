@@ -1,14 +1,124 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/jpeg" href="/Agoccarelogo.jpeg" />
-    <link rel="apple-touch-icon" href="/Agoccarelogo.jpeg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#044b99" />
-    <title>Agoc Care - Your Online Pharmacy</title>
-    <meta name="description" content="Buy medicines, vitamins and healthcare products online at best prices. Fast delivery across India." />
-    <!-- Razorpay loaded here so window.Razorpay is always available -->
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="/Agoccarelogo.jpeg" />
+    <link rel="apple-touch-icon" href="/Agoccarelogo.jpeg" />
+
+    <!-- Primary SEO -->
+    <title>AgocCare – Buy Medicines Online India</title>
+    <meta name="description" content="Buy genuine medicines & healthcare products online. Free delivery above ₹499. Licensed pharmacy. Fast delivery across India." />
+    <meta name="keywords" content="buy medicines online, online pharmacy india, agoccare, medicine delivery, genuine medicines" />
+    <meta name="robots" content="index,follow" />
+    <meta name="author" content="Agoc Care Pvt Ltd" />
+    <link rel="canonical" href="https://agoccarepvtltd.com/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website" />
+    <meta property="og:site_name"   content="AgocCare" />
+    <meta property="og:title"       content="AgocCare – Buy Medicines Online India" />
+    <meta property="og:description" content="Buy genuine medicines & healthcare products online. Free delivery above ₹499. Licensed pharmacy." />
+    <meta property="og:url"         content="https://agoccarepvtltd.com/" />
+    <meta property="og:image"       content="https://agoccarepvtltd.com/Agoccarelogo.jpeg" />
+    <meta property="og:locale"      content="en_IN" />
+
+    <!-- Twitter/X Card -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:title"       content="AgocCare – Buy Medicines Online India" />
+    <meta name="twitter:description" content="Buy genuine medicines & healthcare products online. Free delivery above ₹499." />
+    <meta name="twitter:image"       content="https://agoccarepvtltd.com/Agoccarelogo.jpeg" />
+
+    <!-- Local Business Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Pharmacy",
+      "name": "Agoc Care Pvt Ltd",
+      "alternateName": "AgocCare",
+      "url": "https://agoccarepvtltd.com",
+      "logo": "https://agoccarepvtltd.com/Agoccarelogo.jpeg",
+      "image": "https://agoccarepvtltd.com/Agoccarelogo.jpeg",
+      "description": "Licensed pharmaceutical company offering wholesale, retail & online medicine delivery across India since 2016.",
+      "telephone": "+919923268310",
+      "email": "agoccarepvtltd@gmail.com",
+      "foundingDate": "2016",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Palladium Building, Near Pristine Womens Hospital, Assembly Road, Shahupuri",
+        "addressLocality": "Kolhapur",
+        "addressRegion": "Maharashtra",
+        "postalCode": "416001",
+        "addressCountry": "IN"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "16.7050",
+        "longitude": "74.2433"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+        "opens": "09:00",
+        "closes": "19:00"
+      },
+      "sameAs": [
+        "https://agoccarepvtltd.com"
+      ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Medicines & Healthcare Products"
+      },
+      "priceRange": "₹₹",
+      "servesCuisine": "Pharmacy",
+      "currenciesAccepted": "INR",
+      "paymentAccepted": "Cash, Credit Card, Debit Card, UPI, Net Banking"
+    }
+    </script>
+
+    <!-- Organization Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Agoc Care Pvt Ltd",
+      "url": "https://agoccarepvtltd.com",
+      "logo": "https://agoccarepvtltd.com/Agoccarelogo.jpeg",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+919923268310",
+        "contactType": "customer service",
+        "availableLanguage": ["English", "Hindi", "Marathi"],
+        "areaServed": "IN"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Kolhapur",
+        "addressRegion": "Maharashtra",
+        "addressCountry": "IN"
+      }
+    }
+    </script>
+
+    <!-- WebSite Schema with SearchAction -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "AgocCare",
+      "url": "https://agoccarepvtltd.com",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://agoccarepvtltd.com/medicines?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- Razorpay -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   </head>
   <body>

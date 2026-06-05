@@ -41,7 +41,7 @@ const CATEGORIES_META = {
 };
 
 const WHY = [
-  { icon:'✅', title:'100% Genuine',        sub:'Sourced directly from licensed manufacturers and verified brands.' },
+  { icon:'✅', title:'100% Genuine',        sub:'Sourced directly from licensed manufacturers.' },
   { icon:'⚡', title:'Fast Delivery',        sub:'Quick dispatch with reliable courier partners across India.' },
   { icon:'🔒', title:'Secure Payments',      sub:'128-bit encrypted checkout via Razorpay. Safe & trusted.' },
   { icon:'📞', title:'Licensed Pharmacists', sub:'Expert support available Mon–Sat, 9 AM to 7 PM.' },
