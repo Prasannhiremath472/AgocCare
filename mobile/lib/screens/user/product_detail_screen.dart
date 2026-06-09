@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:photo_view/photo_view.dart';
 import '../../widgets/app_image.dart';
 import '../../core/theme.dart';
-import '../../core/constants.dart';
 import '../../core/helpers.dart';
 import '../../providers/products_provider.dart';
 import '../../providers/cart_provider.dart';
-import '../../widgets/shimmer_card.dart';
+import '../../models/product_model.dart';
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
   final String slug;
@@ -25,19 +23,38 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final productAsync = ref.watch(productDetailProvider(widget.slug));
-    final cart = ref.watch(cartProvider);
 
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: productAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 12),
+              const Text('Could not load product', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () => ref.invalidate(productDetailProvider(widget.slug)),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
         data: (product) {
           final allImages = [
             if (product.image != null) product.image!,
             ...product.images.map((i) => i.imagePath),
           ];
-          final inCart = cart.any((e) => e.product.id == product.id);
+          // Guard against out-of-bounds if images changed
+          if (_selectedImage >= allImages.length) {
+            _selectedImage = 0;
+          }
+          final inCart = ref.watch(cartProvider.select(
+            (items) => items.any((e) => e.product.id == product.id),
+          ));
 
           return CustomScrollView(
             slivers: [
@@ -62,7 +79,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 flexibleSpace: FlexibleSpaceBar(
                   background: allImages.isNotEmpty
                       ? GestureDetector(
-                          onTap: () => _showImageViewer(context, AppHelpers.imgUrl(allImages[_selectedImage])),
+                          onTap: () => _showImageViewer(context, allImages.map(AppHelpers.imgUrl).toList(), _selectedImage),
                           child: AppImage(
                             url: AppHelpers.imgUrl(allImages[_selectedImage]),
                             fit: BoxFit.contain,
@@ -88,7 +105,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           itemCount: allImages.length,
                           separatorBuilder: (_, __) => const SizedBox(width: 8),
                           itemBuilder: (_, i) => GestureDetector(
-                            onTap: () => setState(() => _selectedImage = i),
+                            onTap: () {
+                              setState(() => _selectedImage = i);
+                              _showImageViewer(context, allImages.map(AppHelpers.imgUrl).toList(), i);
+                            },
                             child: Container(
                               width: 54, height: 54,
                               decoration: BoxDecoration(
@@ -177,74 +197,21 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           );
         },
       ),
-      bottomNavigationBar: productAsync.when(
-        data: (product) => Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, -4))],
-          ),
-          child: SafeArea(
-            child: Row(
-              children: [
-                // Qty selector
-                if (!product.prescriptionRequired) ...[
-                  Container(
-                    decoration: BoxDecoration(border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(10)),
-                    child: Row(
-                      children: [
-                        _QtyBtn(icon: Icons.remove, onTap: () { if (_qty > 1) setState(() => _qty--); }),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('$_qty', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                        ),
-                        _QtyBtn(icon: Icons.add, onTap: () => setState(() => _qty++)),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                ],
-                Expanded(
-                  child: SizedBox(
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      onPressed: product.inStock && !product.prescriptionRequired
-                          ? () {
-                              ref.read(cartProvider.notifier).addItem(product, qty: _qty);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text('Added to cart'),
-                                  action: SnackBarAction(label: 'View Cart', textColor: AppColors.cta, onPressed: () => context.push(AppRoutes.cart)),
-                                ),
-                              );
-                            }
-                          : null,
-                      icon: Icon(product.prescriptionRequired ? Icons.upload_file_rounded : Icons.shopping_cart_rounded),
-                      label: Text(
-                        product.prescriptionRequired ? 'Upload Prescription' : (product.inStock ? 'Add to Cart' : 'Out of Stock'),
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        loading: () => const SizedBox(),
-        error: (_, __) => const SizedBox(),
+      bottomNavigationBar: productAsync.maybeWhen(
+        data: (product) => _CartBar(product: product, qty: _qty, onQtyChange: (v) => setState(() => _qty = v)),
+        orElse: () => const SizedBox(),
       ),
     );
   }
 
-  void _showImageViewer(BuildContext context, String url) {
-    Navigator.push(context, MaterialPageRoute(
-      builder: (_) => Scaffold(
-        backgroundColor: Colors.black,
-        appBar: AppBar(backgroundColor: Colors.black, foregroundColor: Colors.white),
-        body: PhotoView(imageProvider: NetworkImage(url)),
-      ),
-    ));
+  void _showImageViewer(BuildContext context, List<String> images, int index) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'close',
+      barrierColor: Colors.black,
+      pageBuilder: (ctx, _, __) => _FullScreenImageViewer(images: images, initialIndex: index),
+    );
   }
 }
 
@@ -296,4 +263,143 @@ class _QtyBtn extends StatelessWidget {
       child: Icon(icon, size: 18, color: AppColors.primary),
     ),
   );
+}
+
+class _CartBar extends ConsumerWidget {
+  final ProductModel product;
+  final int qty;
+  final ValueChanged<int> onQtyChange;
+  const _CartBar({required this.product, required this.qty, required this.onQtyChange});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final inCart = ref.watch(cartProvider.select(
+      (items) => items.any((e) => e.product.id == product.id),
+    ));
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 12, offset: const Offset(0, -4))],
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            if (!product.prescriptionRequired && !inCart) ...[
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    _QtyBtn(icon: Icons.remove, onTap: () { if (qty > 1) onQtyChange(qty - 1); }),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('$qty', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                    ),
+                    _QtyBtn(icon: Icons.add, onTap: () => onQtyChange(qty + 1)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+            ],
+            Expanded(
+              child: SizedBox(
+                height: 50,
+                child: inCart
+                    ? ElevatedButton.icon(
+                        onPressed: () => context.push('/cart'),
+                        icon: const Icon(Icons.shopping_cart_rounded),
+                        label: const Text('Go to Cart',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                      )
+                    : ElevatedButton.icon(
+                        onPressed: product.inStock && !product.prescriptionRequired
+                            ? () {
+                                ref.read(cartProvider.notifier).addItem(product, qty: qty);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Added to cart'),
+                                    action: SnackBarAction(
+                                      label: 'View Cart',
+                                      textColor: AppColors.cta,
+                                      onPressed: () => context.push('/cart'),
+                                    ),
+                                  ),
+                                );
+                              }
+                            : null,
+                        icon: Icon(product.prescriptionRequired
+                            ? Icons.upload_file_rounded
+                            : Icons.shopping_cart_rounded),
+                        label: Text(
+                          product.prescriptionRequired
+                              ? 'Upload Prescription'
+                              : product.inStock ? 'Add to Cart' : 'Out of Stock',
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FullScreenImageViewer extends StatefulWidget {
+  final List<String> images;
+  final int initialIndex;
+  const _FullScreenImageViewer({required this.images, required this.initialIndex});
+
+  @override
+  State<_FullScreenImageViewer> createState() => _FullScreenImageViewerState();
+}
+
+class _FullScreenImageViewerState extends State<_FullScreenImageViewer> {
+  late final PageController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: PageView.builder(
+        controller: _ctrl,
+        itemCount: widget.images.length,
+        itemBuilder: (_, i) => InteractiveViewer(
+          minScale: 0.5,
+          maxScale: 4.0,
+          child: Center(
+            child: Image.network(
+              widget.images[i],
+              fit: BoxFit.contain,
+              loadingBuilder: (_, child, progress) => progress == null
+                  ? child
+                  : const Center(child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
+              errorBuilder: (_, __, ___) => const Icon(Icons.broken_image_rounded, color: Colors.white54, size: 64),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

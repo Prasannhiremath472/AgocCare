@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../core/theme.dart';
 import '../../core/helpers.dart';
+import '../../core/constants.dart';
 import '../../models/order_model.dart';
 import '../../providers/orders_provider.dart';
+import '../../providers/cart_provider.dart';
 import '../../widgets/app_bottom_nav.dart';
 
 class OrdersScreen extends ConsumerWidget {
@@ -29,21 +30,49 @@ class OrdersScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
-            const SizedBox(height: 12),
-            Text('$e', textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            ElevatedButton(onPressed: () => ref.read(ordersProvider.notifier).fetch(), child: const Text('Retry')),
+            const Icon(Icons.cloud_off_rounded, size: 64, color: Color(0xFFCCCCCC)),
+            const SizedBox(height: 16),
+            const Text('Unable to load orders', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF444444))),
+            const SizedBox(height: 6),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40),
+              child: Text('Please check your internet connection and try again.', textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: Color(0xFF888888), height: 1.5)),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () => ref.read(ordersProvider.notifier).fetch(),
+              icon: const Icon(Icons.refresh_rounded, size: 16),
+              label: const Text('Try Again'),
+            ),
           ]),
         ),
         data: (orders) => orders.isEmpty
             ? Center(
                 child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Icon(Icons.receipt_long_outlined, size: 80, color: AppColors.textMuted.withOpacity(0.5)),
-                  const SizedBox(height: 16),
-                  const Text('No orders yet', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                  const SizedBox(height: 24),
-                  ElevatedButton(onPressed: () => context.go('/medicines'), child: const Text('Start Shopping')),
+                  Container(
+                    width: 100, height: 100,
+                    decoration: BoxDecoration(color: const Color(0xFFF0F4FF), shape: BoxShape.circle),
+                    child: const Icon(Icons.receipt_long_outlined, size: 48, color: AppColors.primary),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text('No orders yet', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF2D2D2D))),
+                  const SizedBox(height: 8),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 40),
+                    child: Text('You haven\'t placed any orders yet.\nStart shopping to see your orders here.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13, color: Color(0xFF888888), height: 1.5)),
+                  ),
+                  const SizedBox(height: 28),
+                  ElevatedButton.icon(
+                    onPressed: () => context.go('/medicines'),
+                    icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+                    label: const Text('Browse Medicines'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                  ),
                 ]),
               )
             : RefreshIndicator(
@@ -57,17 +86,17 @@ class OrdersScreen extends ConsumerWidget {
                 ),
               ),
       ),
-      bottomNavigationBar: const AppBottomNav(currentIndex: 3),
+      bottomNavigationBar: const AppBottomNav(currentIndex: 2),
     );
   }
 }
 
-class _OrderCard extends StatelessWidget {
+class _OrderCard extends ConsumerWidget {
   final OrderModel order;
   const _OrderCard({required this.order});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final statusColor = _statusColor(order.status);
     return GestureDetector(
       onTap: () => context.push('/orders/${order.id}'),
@@ -104,6 +133,35 @@ class _OrderCard extends StatelessWidget {
             const SizedBox(width: 8),
             const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 18),
           ]),
+          if (order.items.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              height: 36,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  ref.read(cartProvider.notifier).buyAgain(order.items);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('${order.items.length} item${order.items.length != 1 ? 's' : ''} added to cart'),
+                      action: SnackBarAction(
+                        label: 'View Cart',
+                        onPressed: () => context.push(AppRoutes.cart),
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.shopping_cart_outlined, size: 16),
+                label: const Text('Buy Again', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary, width: 1.5),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding: EdgeInsets.zero,
+                ),
+              ),
+            ),
+          ],
         ]),
       ),
     );
@@ -172,7 +230,7 @@ class OrderDetailScreen extends ConsumerWidget {
                     child: const Icon(Icons.medication_rounded, color: AppColors.primary)),
                   const SizedBox(width: 12),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(item.productName ?? 'Product', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                    Text(item.name.isNotEmpty ? item.name : 'Product', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                     Text('Qty: ${item.qty}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                   ])),
                   Text(AppHelpers.formatPrice(item.price * item.qty),
@@ -203,9 +261,9 @@ class OrderDetailScreen extends ConsumerWidget {
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppRadius.lg)),
                 child: Column(children: [
                   _SRow('Total', AppHelpers.formatPrice(order.total), bold: true),
-                  if (order.razorpayPaymentId != null) ...[
+                  if (order.razorpayOrderId != null) ...[
                     const SizedBox(height: 4),
-                    _SRow('Payment ID', order.razorpayPaymentId!),
+                    _SRow('Payment Ref', order.razorpayOrderId!),
                   ],
                 ]),
               ),

@@ -179,7 +179,7 @@ class CartScreen extends ConsumerWidget {
                 ),
               ],
             ),
-      bottomNavigationBar: const AppBottomNav(currentIndex: 2),
+      bottomNavigationBar: const AppBottomNav(currentIndex: 3),
     );
   }
 

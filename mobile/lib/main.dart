@@ -23,6 +23,11 @@ import 'screens/user/about_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
+
+  // Increase image cache: 150 MB / 500 images
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 150 << 20;
+  PaintingBinding.instance.imageCache.maximumSize = 500;
+
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,

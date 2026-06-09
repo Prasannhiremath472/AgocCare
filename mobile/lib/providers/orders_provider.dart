@@ -16,13 +16,20 @@ class OrdersNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
       final orders = await _api.getOrders();
       state = AsyncValue.data(orders);
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      // If it's a 404 (no orders endpoint) treat as empty list
+      final msg = e.toString();
+      if (msg.contains('404')) {
+        state = const AsyncValue.data([]);
+      } else {
+        state = AsyncValue.error(e, st);
+      }
     }
   }
 }
 
 final ordersProvider =
     StateNotifierProvider<OrdersNotifier, AsyncValue<List<OrderModel>>>((ref) {
+  ref.keepAlive();
   return OrdersNotifier(ref.read(apiServiceProvider));
 });
 

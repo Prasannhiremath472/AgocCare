@@ -51,22 +51,21 @@ class AppImage extends StatelessWidget {
         errorBuilder: (_, __, ___) => fallback,
       );
     } else {
-      // Network URL → CachedNetworkImage
+      // Network URL → CachedNetworkImage with memory-size cap to avoid decoding full-res images
+      final cacheW = width?.toInt();
+      final cacheH = height?.toInt();
       image = CachedNetworkImage(
         imageUrl: url!,
         width: width,
         height: height,
         fit: fit,
+        memCacheWidth: cacheW != null ? cacheW * 2 : null,   // 2x for retina
+        memCacheHeight: cacheH != null ? cacheH * 2 : null,
+        fadeInDuration: const Duration(milliseconds: 150),
         placeholder: (_, __) => Container(
           width: width,
           height: height,
           color: AppColors.border,
-          child: const Center(
-            child: SizedBox(
-              width: 24, height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
-            ),
-          ),
         ),
         errorWidget: (_, __, ___) => fallback,
       );

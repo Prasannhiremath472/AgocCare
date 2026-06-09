@@ -6,27 +6,29 @@ import '../core/constants.dart';
 class ApiClient {
   static ApiClient? _instance;
   late Dio _dio;
+  String? _cachedToken; // in-memory token cache — avoids disk read per request
 
   ApiClient._internal() {
     final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:5000/api';
     _dio = Dio(BaseOptions(
       baseUrl: baseUrl,
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 15),
+      connectTimeout: const Duration(seconds: 20),
+      receiveTimeout: const Duration(seconds: 30),
       headers: {'Content-Type': 'application/json'},
     ));
 
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final prefs = await SharedPreferences.getInstance();
-        final token = prefs.getString(AppConstants.tokenKey);
-        if (token != null) {
-          options.headers['Authorization'] = 'Bearer $token';
+        // Use cached token; fall back to disk only if cache is empty
+        _cachedToken ??= (await SharedPreferences.getInstance()).getString(AppConstants.tokenKey);
+        if (_cachedToken != null) {
+          options.headers['Authorization'] = 'Bearer $_cachedToken';
         }
         handler.next(options);
       },
       onError: (DioException e, handler) async {
         if (e.response?.statusCode == 401) {
+          _cachedToken = null;
           final prefs = await SharedPreferences.getInstance();
           await prefs.remove(AppConstants.tokenKey);
           await prefs.remove(AppConstants.userKey);
@@ -40,6 +42,9 @@ class ApiClient {
     _instance ??= ApiClient._internal();
     return _instance!;
   }
+
+  // Called by AuthNotifier after login/logout to keep cache in sync
+  void setToken(String? token) => _cachedToken = token;
 
   Dio get dio => _dio;
 

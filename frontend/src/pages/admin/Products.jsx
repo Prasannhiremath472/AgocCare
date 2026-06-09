@@ -11,6 +11,7 @@ const EMPTY = {
   name:'', slug:'', description:'', price:'', mrp:'', stock:'',
   category_id:'', composition:'', manufacturer:'', expiry_date:'',
   prescription_required: false,
+  meta_title:'', meta_description:'', meta_keywords:'',
 };
 
 const calcPrice = (mrp, off) => {
@@ -446,6 +447,7 @@ export default function AdminProducts() {
               <div className="flex border-b border-gray-100 px-6 bg-white">
                 {[
                   { id: 'details', label: 'Product Details', icon: '📋' },
+                  { id: 'seo', label: 'SEO', icon: '🔍' },
                   { id: 'gallery', label: 'Gallery Images', icon: '🖼️', disabled: !editing },
                 ].map(tab => (
                   <button
@@ -650,6 +652,101 @@ export default function AdminProducts() {
                           Saving…
                         </span>
                       ) : editing ? 'Save & Go to Gallery →' : 'Create & Add Images →'}
+                    </motion.button>
+                  </div>
+                </form>
+              )}
+
+              {/* Tab: SEO */}
+              {activeTab === 'seo' && (
+                <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                  <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-700">
+                    These fields control how this product appears in Google search results. Leave blank to use defaults.
+                  </div>
+
+                  {/* Meta Title */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-[11px] font-black text-gray-500 uppercase tracking-wider">Meta Title</label>
+                      <span className={`text-[10px] font-semibold ${(form.meta_title || '').length > 60 ? 'text-red-500' : 'text-gray-400'}`}>
+                        {(form.meta_title || '').length}/60
+                      </span>
+                    </div>
+                    <input
+                      name="meta_title" type="text" maxLength={80}
+                      value={form.meta_title || ''}
+                      onChange={handleChange}
+                      placeholder={`e.g. ${form.name || 'Product Name'} | Buy Online at AgocCare`}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-teal bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">Recommended: 50–60 characters</p>
+                  </div>
+
+                  {/* Meta Description */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-[11px] font-black text-gray-500 uppercase tracking-wider">Meta Description</label>
+                      <span className={`text-[10px] font-semibold ${(form.meta_description || '').length > 160 ? 'text-red-500' : 'text-gray-400'}`}>
+                        {(form.meta_description || '').length}/160
+                      </span>
+                    </div>
+                    <textarea
+                      name="meta_description"
+                      value={form.meta_description || ''}
+                      onChange={handleChange}
+                      rows={3} maxLength={200}
+                      placeholder="Brief description of the product for search engines..."
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-teal bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all resize-none"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">Recommended: 120–160 characters</p>
+                  </div>
+
+                  {/* Meta Keywords */}
+                  <div>
+                    <label className="block text-[11px] font-black text-gray-500 mb-1.5 uppercase tracking-wider">Meta Keywords</label>
+                    <textarea
+                      name="meta_keywords"
+                      value={form.meta_keywords || ''}
+                      onChange={handleChange}
+                      rows={2}
+                      placeholder="keyword1, keyword2, keyword3, ..."
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-teal bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all resize-none"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">Comma-separated keywords</p>
+                  </div>
+
+                  {/* Google Preview */}
+                  {(form.meta_title || form.name) && (
+                    <div className="border border-gray-200 rounded-xl p-4 bg-white">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-3">Google Preview</p>
+                      <div className="space-y-0.5">
+                        <p className="text-[13px] font-medium text-blue-700 truncate">
+                          {form.meta_title || form.name}
+                        </p>
+                        <p className="text-[11px] text-green-700">agoccarepvtltd.com/products/{form.slug || 'product-slug'}</p>
+                        <p className="text-[12px] text-gray-600 line-clamp-2 leading-snug">
+                          {form.meta_description || form.description || 'No description set.'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 justify-end pt-2 border-t border-gray-100">
+                    <motion.button type="button" onClick={() => setShowForm(false)}
+                      whileTap={{ scale:0.97 }}
+                      className="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-sm font-semibold text-gray-600 hover:border-gray-300 transition-colors">
+                      Cancel
+                    </motion.button>
+                    <motion.button type="submit" disabled={saving}
+                      whileHover={saving ? {} : { scale:1.02 }} whileTap={saving ? {} : { scale:0.97 }}
+                      className="btn-primary px-6 py-2.5 text-sm">
+                      {saving ? (
+                        <span className="flex items-center gap-2">
+                          <motion.span animate={{ rotate:360 }} transition={{ duration:0.8, repeat:Infinity, ease:'linear' }}
+                            className="w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block"/>
+                          Saving…
+                        </span>
+                      ) : 'Save SEO'}
                     </motion.button>
                   </div>
                 </form>

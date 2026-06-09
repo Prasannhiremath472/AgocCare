@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cart_model.dart';
 import '../models/product_model.dart';
+import '../models/order_model.dart';
 import '../core/constants.dart';
 import '../core/helpers.dart';
 
@@ -54,6 +55,22 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     if (idx >= 0) updated[idx].quantity = qty;
     state = updated;
     _saveCart();
+  }
+
+  void buyAgain(List<OrderItem> items) {
+    for (final item in items) {
+      final product = ProductModel(
+        id: item.productId,
+        name: item.name,
+        slug: item.slug ?? '',
+        price: item.price,
+        stock: 99,
+        prescriptionRequired: false,
+        isActive: true,
+        image: item.image,
+      );
+      addItem(product, qty: item.qty);
+    }
   }
 
   void clearCart() {

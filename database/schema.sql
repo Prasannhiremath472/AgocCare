@@ -93,6 +93,11 @@ CREATE TABLE IF NOT EXISTS consultations (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
+-- SEO fields for products (run if table already exists)
+-- ALTER TABLE products ADD COLUMN meta_title VARCHAR(100) DEFAULT NULL AFTER is_active;
+-- ALTER TABLE products ADD COLUMN meta_description VARCHAR(300) DEFAULT NULL AFTER meta_title;
+-- ALTER TABLE products ADD COLUMN meta_keywords VARCHAR(500) DEFAULT NULL AFTER meta_description;
+
 -- Seed: categories
 INSERT INTO categories (name, slug) VALUES
 ('Tablets', 'tablets'),

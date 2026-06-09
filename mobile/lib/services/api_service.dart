@@ -33,7 +33,7 @@ class ApiService {
   // ── Products ──────────────────────────────────────────────────────────────
   Future<Map<String, dynamic>> getProducts({
     int page = 1,
-    int limit = 12,
+    int limit = 20,
     String? search,
     String? category,
     String? sort,
@@ -131,13 +131,22 @@ class ApiService {
 
   Future<List<OrderModel>> getOrders() async {
     final res = await _client.get('/orders');
-    final list = res.data['orders'] as List<dynamic>? ?? res.data as List<dynamic>? ?? [];
-    return list.map((e) => OrderModel.fromJson(e as Map<String, dynamic>)).toList();
+    final data = res.data;
+    // Backend returns a plain array
+    final list = data is List ? data : <dynamic>[];
+    return list
+        .whereType<Map<String, dynamic>>()
+        .map(OrderModel.fromJson)
+        .toList();
   }
 
   Future<OrderModel> getOrder(int id) async {
     final res = await _client.get('/orders/$id');
-    return OrderModel.fromJson(res.data['order'] ?? res.data);
+    // Backend returns the order object directly (spread with items)
+    final data = res.data is Map<String, dynamic>
+        ? res.data as Map<String, dynamic>
+        : res.data['order'] as Map<String, dynamic>;
+    return OrderModel.fromJson(data);
   }
 
   // ── Payment ───────────────────────────────────────────────────────────────

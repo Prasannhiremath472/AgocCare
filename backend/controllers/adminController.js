@@ -7,13 +7,13 @@ const MAX_IMAGE_BYTES = 2 * 1024 * 1024; // 2 MB as base64 (~2.7MB string, but c
 const imageTooLarge = (b64) => b64 && Buffer.byteLength(b64) > MAX_IMAGE_BYTES * 1.4;
 
 exports.createProduct = async (req, res) => {
-  const { name, slug, description, price, mrp, stock, category_id, composition, manufacturer, expiry_date, prescription_required, image } = req.body;
+  const { name, slug, description, price, mrp, stock, category_id, composition, manufacturer, expiry_date, prescription_required, image, meta_title, meta_description, meta_keywords } = req.body;
   if (imageTooLarge(image)) return res.status(400).json({ message: 'Image must be 2 MB or smaller' });
   try {
     const [result] = await db.query(
-      `INSERT INTO products (name, slug, description, price, mrp, stock, category_id, composition, manufacturer, expiry_date, prescription_required, image)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, slug, description || null, price, mrp || null, stock, category_id, composition || null, manufacturer || null, expiry_date || null, prescription_required ? 1 : 0, image || null]
+      `INSERT INTO products (name, slug, description, price, mrp, stock, category_id, composition, manufacturer, expiry_date, prescription_required, image, meta_title, meta_description, meta_keywords)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, slug, description || null, price, mrp || null, stock, category_id, composition || null, manufacturer || null, expiry_date || null, prescription_required ? 1 : 0, image || null, meta_title || null, meta_description || null, meta_keywords || null]
     );
     res.status(201).json({ id: result.insertId, message: 'Product created' });
   } catch (err) {
@@ -23,7 +23,7 @@ exports.createProduct = async (req, res) => {
 };
 
 exports.updateProduct = async (req, res) => {
-  const { name, slug, description, price, mrp, stock, category_id, composition, manufacturer, expiry_date, prescription_required, is_active, image } = req.body;
+  const { name, slug, description, price, mrp, stock, category_id, composition, manufacturer, expiry_date, prescription_required, is_active, image, meta_title, meta_description, meta_keywords } = req.body;
   if (imageTooLarge(image)) return res.status(400).json({ message: 'Image must be 2 MB or smaller' });
   const fields = { name, slug, description, price,
     mrp:                  mrp         === '' ? null : mrp,
@@ -32,6 +32,9 @@ exports.updateProduct = async (req, res) => {
     manufacturer:         manufacturer === '' ? null : manufacturer,
     expiry_date:          expiry_date  === '' ? null : expiry_date,
     prescription_required, is_active,
+    meta_title:           meta_title        === '' ? null : (meta_title        ?? undefined),
+    meta_description:     meta_description  === '' ? null : (meta_description  ?? undefined),
+    meta_keywords:        meta_keywords     === '' ? null : (meta_keywords     ?? undefined),
   };
   if (image) fields.image = image; // base64 string from frontend
 

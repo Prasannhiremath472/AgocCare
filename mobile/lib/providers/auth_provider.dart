@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import '../services/api_service.dart';
+import '../core/api_client.dart';
 import '../core/constants.dart';
 
 class AuthState {
@@ -27,9 +28,10 @@ class AuthState {
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final ApiService _api;
+  late final Future<void> initialized;
 
   AuthNotifier(this._api) : super(const AuthState()) {
-    _loadFromStorage();
+    initialized = _loadFromStorage();
   }
 
   Future<void> _loadFromStorage() async {
@@ -39,12 +41,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     if (token != null && userStr != null) {
       try {
         final user = UserModel.fromJson(jsonDecode(userStr) as Map<String, dynamic>);
+        ApiClient.instance.setToken(token); // warm up in-memory cache
         state = AuthState(user: user, token: token);
       } catch (_) {}
     }
   }
 
   Future<void> _saveToStorage(UserModel user, String token) async {
+    ApiClient.instance.setToken(token);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(AppConstants.tokenKey, token);
     await prefs.setString(AppConstants.userKey, jsonEncode(user.toJson()));
@@ -101,6 +105,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
+    ApiClient.instance.setToken(null);
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(AppConstants.tokenKey);
     await prefs.remove(AppConstants.userKey);
